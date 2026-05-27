@@ -5,11 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>休假日產生器-V1</title>
-
     <style>
-
         /* ==================== 字體 ==================== */
-
         @font-face {
             font-family: 'LocalBerlinFont';
             src: url('BRLNSDB.TTF') format('truetype'),
@@ -17,747 +14,202 @@
             font-weight: bold;
             font-style: normal;
         }
-
         @import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@800;900&display=swap');
 
         body {
-            font-family:
-                'LocalBerlinFont',
-                'League Spartan',
-                'Berlin Sans FB Demi-Bold',
-                'Arial Black',
-                "Microsoft JhengHei",
-                sans-serif;
-
+            font-family: 'LocalBerlinFont', 'League Spartan', 'Berlin Sans FB Demi-Bold', 'Arial Black', "Microsoft JhengHei", sans-serif;
             margin: 0;
             padding: 20px 15px;
-
             background: #8a8a8a;
-
             display: flex;
             flex-direction: column;
             align-items: center;
-
             box-sizing: border-box;
         }
 
         /* ==================== 控制區 ==================== */
-
         .controls {
-
             margin-bottom: 25px;
-
             background: rgba(255,255,255,0.95);
-
             padding: 20px;
-
             border-radius: 12px;
-
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-
             display: flex;
             flex-direction: column;
             align-items: center;
-
             gap: 15px;
-
             max-width: 460px;
             width: 100%;
-
             box-sizing: border-box;
         }
 
         .inputs-group {
-
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-
             gap: 15px;
-
             width: 100%;
         }
 
         .controls label {
-
             font-size: 18px;
             font-weight: bold;
-
             display: flex;
             align-items: center;
-
             gap: 5px;
         }
 
         .controls input,
         .controls select {
-
             font-size: 18px;
-
             padding: 6px;
-
             border: 1px solid #ccc;
             border-radius: 6px;
         }
 
         .btn-group {
-
             display: flex;
             flex-direction: column;
-
             gap: 10px;
-
             width: 100%;
         }
 
         .controls button {
-
             font-size: 16px;
             font-weight: bold;
-
             padding: 12px 15px;
-
             border: none;
             border-radius: 6px;
-
             cursor: pointer;
-
             width: 100%;
-
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-
             transition: 0.2s;
         }
 
-        .btn-standard {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .btn-fb {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .controls button:hover {
-            opacity: 0.9;
-        }
+        .btn-standard { background-color: #28a745; color: white; }
+        .btn-fb { background-color: #007bff; color: white; }
+        .controls button:hover { opacity: 0.9; }
 
         /* ==================== 日曆圖卡 ==================== */
-
         .capture-area {
-
             background: #8a8a8a;
-
-            /*
-                標準模式維持舒適感
-            */
             padding: 40px 30px;
-
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-
             max-width: 460px;
             width: 100%;
-
             box-sizing: border-box;
-
             box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-
             border-radius: 8px;
         }
 
-        /* ==================== FB 專用緊湊模式 ==================== */
-
-        .fb-mode {
-
-            /*
-                上方縮短
-                下方保留
-            */
-            padding: 15px 30px 30px 30px !important;
-        }
-
-        .fb-mode .year-header {
-
-            margin-top: 0px !important;
-            margin-bottom: 10px !important;
-        }
-
-        .fb-mode .month-header {
-
-            margin-bottom: 14px !important;
-        }
-
-        /* ==================== 年份 ==================== */
+        .fb-mode { padding: 15px 30px 30px 30px !important; }
+        .fb-mode .year-header { margin-top: 0px !important; margin-bottom: 10px !important; }
+        .fb-mode .month-header { margin-bottom: 14px !important; }
 
         .year-header {
-
             font-size: 68px;
             font-weight: 900;
-
             color: #000000;
-
             line-height: 1;
-
             margin-top: 5px;
             margin-bottom: 30px;
-
             text-align: center;
-
             width: 100%;
-
             letter-spacing: -1px;
         }
 
-        /* ==================== 月曆主體 ==================== */
-
         .calendar-container {
-
             width: 100%;
-
             background: #ffffff;
-
             padding: 35px 25px 40px 25px;
-
             border-radius: 35px;
-
             text-align: center;
-
             box-sizing: border-box;
         }
 
-        .month-header {
-
-            font-size: 48px;
-            font-weight: bold;
-
-            color: #000000;
-
-            margin-bottom: 25px;
-        }
-
-        /* ==================== 日期格 ==================== */
+        .month-header { font-size: 48px; font-weight: bold; color: #000000; margin-bottom: 25px; }
 
         .calendar-grid {
-
             display: grid;
-
             grid-template-columns: repeat(7, 1fr);
-
             row-gap: 22px;
             column-gap: 2px;
-
             width: 100%;
         }
 
-        .weekday-label {
-
-            color: #909090;
-
-            font-weight: bold;
-
-            font-size: 28px;
-
-            padding-bottom: 5px;
-        }
+        .weekday-label { color: #909090; font-weight: bold; font-size: 28px; padding-bottom: 5px; }
 
         .day-cell {
-
             position: relative;
-
             font-size: 34px;
             font-weight: bold;
-
             color: #000000;
-
             cursor: pointer;
-
             user-select: none;
-
             height: 55px;
-
             display: flex;
             flex-direction: column;
-
             align-items: center;
             justify-content: flex-start;
         }
 
-        .empty-cell {
-
-            height: 55px;
-        }
-
-        /* ==================== 紅圈休 ==================== */
+        .empty-cell { height: 55px; }
 
         .day-cell.holiday::after {
-
             content: '休';
-
             position: absolute;
-
             bottom: -6px;
-
             font-size: 13px;
-
             color: #e60000;
-
             border: 2px solid #e60000;
             border-radius: 50%;
-
             width: 20px;
             height: 20px;
-
             line-height: 16px;
-
             text-align: center;
-
             font-weight: bold;
-
             font-family: "Microsoft JhengHei", sans-serif;
-
             background: #ffffff;
         }
-
     </style>
 </head>
-
 <body>
 
-    <!-- ==================== 控制區 ==================== -->
-
     <div class="controls">
-
         <div class="inputs-group">
-
             <label>
                 年:
-                <input
-                    type="number"
-                    id="year"
-                    value="2026"
-                    style="width:75px;"
-                    oninput="renderCalendar()"
-                    onchange="renderCalendar()"
-                >
+                <input type="number" id="year" value="2026" style="width:75px;" oninput="renderCalendar()" onchange="renderCalendar()">
             </label>
-
             <label>
                 月:
-                <input
-                    type="number"
-                    id="month"
-                    value="6"
-                    min="1"
-                    max="12"
-                    style="width:55px;"
-                    oninput="renderCalendar()"
-                    onchange="renderCalendar()"
-                >
+                <select id="month" onchange="renderCalendar()" style="font-size: 18px; padding: 6px;"></select>
             </label>
-
             <label>
                 起始:
                 <select id="startDay" onchange="renderCalendar()">
-
-                    <option value="1">
-                        星期一
-                    </option>
-
-                    <option value="0">
-                        星期日
-                    </option>
-
+                    <option value="1">星期一</option>
+                    <option value="0">星期日</option>
                 </select>
             </label>
-
         </div>
-
         <div class="btn-group">
-
-            <button
-                class="btn-standard"
-                onclick="generateStandardImage()"
-            >
-                📥 1. 下載標準圖卡
-            </button>
-
-            <button
-                class="btn-fb"
-                onclick="generateFBImage()"
-            >
-                📷 2. 下載 FB 貼文直式長圖
-            </button>
-
+            <button class="btn-standard" onclick="generateStandardImage()">📥 1. 下載標準圖卡</button>
+            <button class="btn-fb" onclick="generateFBImage()">📷 2. 下載 FB 貼文直式長圖</button>
         </div>
-
     </div>
-
-    <!-- ==================== 日曆圖卡 ==================== -->
 
     <div id="captureArea" class="capture-area">
-
-        <div class="year-header" id="yearText">
-            2026
-        </div>
-
+        <div class="year-header" id="yearText">2026</div>
         <div class="calendar-container">
-
-            <div class="month-header" id="monthText">
-                6月
-            </div>
-
-            <div
-                class="calendar-grid"
-                id="calendarGrid"
-            ></div>
-
+            <div class="month-header" id="monthText">6月</div>
+            <div class="calendar-grid" id="calendarGrid"></div>
         </div>
-
     </div>
 
-    <!-- ==================== JS ==================== -->
-
     <script>
-
         function initDefaultDate() {
-
             const today = new Date();
-
-            let currentYear = today.getFullYear();
-
-            let nextMonth = today.getMonth() + 2;
-
-            if (nextMonth > 12) {
-
-                nextMonth = 1;
-
-                currentYear += 1;
-            }
-
-            document.getElementById('year').value =
-                currentYear;
-
-            document.getElementById('month').value =
-                nextMonth;
-        }
-
-        function renderCalendar() {
-
-            const yearInput =
-                document.getElementById('year');
-
-            const monthInput =
-                document.getElementById('month');
-
-            const startDaySelect =
-                document.getElementById('startDay');
-
-            const grid =
-                document.getElementById('calendarGrid');
-
-            const yearText =
-                document.getElementById('yearText');
-
-            const monthText =
-                document.getElementById('monthText');
-
-            if (!grid || !yearInput || !monthInput)
-                return;
-
-            const year =
-                parseInt(yearInput.value, 10);
-
-            const month =
-                parseInt(monthInput.value, 10);
-
-            if (
-                isNaN(year) ||
-                isNaN(month) ||
-                month < 1 ||
-                month > 12
-            ) return;
-
-            const startFromMon =
-                startDaySelect.value === "1";
-
-            yearText.innerText = year;
-
-            monthText.innerText = `${month}月`;
-
-            grid.innerHTML = '';
-
-            const labels = startFromMon
-                ? ['一','二','三','四','五','六','日']
-                : ['日','一','二','三','四','五','六'];
-
-            labels.forEach(l => {
-
-                const el =
-                    document.createElement('div');
-
-                el.className = 'weekday-label';
-
-                el.innerText = l;
-
-                grid.appendChild(el);
-
-            });
-
-            const firstDayIndex =
-                new Date(year, month - 1, 1).getDay();
-
-            const totalDays =
-                new Date(year, month, 0).getDate();
-
-            let emptySlots = startFromMon
-                ? (firstDayIndex === 0 ? 6 : firstDayIndex - 1)
-                : firstDayIndex;
-
-            for (let i = 0; i < emptySlots; i++) {
-
-                const emptyCell =
-                    document.createElement('div');
-
-                emptyCell.className = 'empty-cell';
-
-                grid.appendChild(emptyCell);
-            }
-
-            for (let day = 1; day <= totalDays; day++) {
-
-                const cell =
-                    document.createElement('div');
-
-                cell.className = 'day-cell';
-
-                cell.innerText = day;
-
-                cell.onclick = function() {
-
-                    this.classList.toggle('holiday');
-                };
-
-                grid.appendChild(cell);
-            }
-        }
-
-        function getFormattedDateString() {
-
-            const y =
-                document.getElementById('year').value;
-
-            const m =
-                parseInt(
-                    document.getElementById('month').value,
-                    10
-                );
-
-            const mStr =
-                m < 10 ? '0' + m : m;
-
-            return `${y}${mStr}`;
-        }
-
-        /* ==================== 標準圖 ==================== */
-
-        function generateStandardImage() {
-
-            const captureArea =
-                document.getElementById('captureArea');
-
-            html2canvas(captureArea, {
-
-                scale: 2,
-
-                backgroundColor: "#8a8a8a"
-
-            }).then(canvas => {
-
-                const link =
-                    document.createElement('a');
-
-                link.download =
-                    `標準_${getFormattedDateString()}休假日.jpg`;
-
-                link.href =
-                    canvas.toDataURL('image/jpg');
-
-                link.click();
-
-            });
-        }
-
-        /* ==================== FB長圖 ==================== */
-
-        function generateFBImage() {
-
-            const captureArea =
-                document.getElementById('captureArea');
-
-            /*
-                FB模式：
-                自動進入緊湊版
-            */
-            captureArea.classList.add('fb-mode');
-
-            html2canvas(captureArea, {
-
-                scale: 2,
-
-                backgroundColor: "#8a8a8a",
-
-                useCORS: true
-
-            }).then(canvas => {
-
-                const finalCanvas =
-                    document.createElement('canvas');
-
-                finalCanvas.width = 1200;
-                finalCanvas.height = 1800;
-
-                const ctx =
-                    finalCanvas.getContext('2d');
-
-                /* 背景 */
-
-                ctx.fillStyle = '#8a8a8a';
-
-                ctx.fillRect(0, 0, 1200, 1800);
-
-                /* ====================
-                   等比例縮放
-                ==================== */
-
-                const scalePercent = 0.88;
-
-                const drawWidth =
-                    1200 * scalePercent;
-
-                const drawHeight =
-                    (canvas.height / canvas.width)
-                    * drawWidth;
-
-                /* ====================
-                   水平置中
-                ==================== */
-
-                const xOffset =
-                    (1200 - drawWidth) / 2;
-
-                /* ====================
-                   智慧上移
-                ==================== */
-
-                const remainingSpace =
-                    1800 - drawHeight;
-
-                let finalYOffset =
-                    remainingSpace * 0.16;
-
-                /*
-                    避免太貼頂
-                */
-
-                finalYOffset =
-                    Math.max(20, finalYOffset);
-
-                /* ====================
-                   繪製
-                ==================== */
-
-                ctx.drawImage(
-
-                    canvas,
-
-                    0,
-                    0,
-
-                    canvas.width,
-                    canvas.height,
-
-                    xOffset,
-                    finalYOffset,
-
-                    drawWidth,
-                    drawHeight
-                );
-
-                /* ====================
-                   移除FB模式
-                ==================== */
-
-                captureArea.classList.remove('fb-mode');
-
-                /* ====================
-                   下載
-                ==================== */
-
-                const link =
-                    document.createElement('a');
-
-                link.download =
-                    `FB_${getFormattedDateString()}休假日.jpg`;
-
-                link.href =
-                    finalCanvas.toDataURL('image/jpg');
-
-                link.click();
-
-            }).catch(error => {
-
-                /*
-                    發生錯誤也移除
-                */
-                captureArea.classList.remove('fb-mode');
-
-                console.error(error);
-
-            });
-        }
-
-        /* ==================== 初始化 ==================== */
-
-        window.addEventListener(
-            'DOMContentLoaded',
-            () => {
-
-                initDefaultDate();
-
-                renderCalendar();
-            }
-        );
-
-    </script>
-
-    <!-- html2canvas -->
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script>
-    
-    const hash = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
-    
-    // 簡單的雜湊比對函數
-    async function checkPassword() {
-        const input = prompt("請輸入密碼：");
-        const encoder = new TextEncoder();
-        const data = encoder.encode(input);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-        if (hashHex !== hash) {
-            window.location.href = "https://www.google.com";
-        }
-    }
-    checkPassword();
-</script>
-    
-
-    
-</body>
-</html>
