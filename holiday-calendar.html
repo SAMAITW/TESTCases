@@ -4,7 +4,7 @@
     <meta name="robots" content="noindex, nofollow">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>休假日圖片產生器 - FB智慧緊湊版</title>
+    <title>休假日產生器-V1</title>
 
     <style>
 
@@ -737,6 +737,27 @@
     <!-- html2canvas -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    
+    const hash = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
+    
+    // 簡單的雜湊比對函數
+    async function checkPassword() {
+        const input = prompt("請輸入密碼：");
+        const encoder = new TextEncoder();
+        const data = encoder.encode(input);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
+        if (hashHex !== hash) {
+            window.location.href = "https://www.google.com";
+        }
+    }
+    checkPassword();
+</script>
+    
+
+    
 </body>
 </html>
