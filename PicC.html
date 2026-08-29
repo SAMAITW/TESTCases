@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>簡單海報製作 (v1.2.1 畫筆版)</title>
+  <title>簡單海報製作 (v1.2.2)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
@@ -191,7 +191,7 @@
 
   <!-- 極簡化頂部，僅留小版號 -->
   <div class="app-header">
-    <span class="version-tag">v1.2.1</span>
+    <span class="version-tag">v1.2.2</span>
   </div>
 
   <!-- 分頁列 -->
@@ -248,7 +248,7 @@
 
     <!-- 分頁 3: 文字編輯 -->
     <div id="textTab" class="tab-content">
-      <input type="text" id="textInput" placeholder="請輸入文字..." value="特惠商品 5 折起">
+      <input type="text" id="textInput" placeholder="請輸入文字..." value="請在這邊輸入文字">
       
       <div class="form-row">
         <div class="compact-field" style="flex: 0 0 75px;">
@@ -501,7 +501,7 @@
       });
 
       document.getElementById('addTextBtn').addEventListener('click', function() {
-        var val = document.getElementById('textInput').value || '預設文字';
+        var val = document.getElementById('textInput').value || '請在這邊輸入文字';
         var text = new fabric.Text(val, {
           left: canvas.width / 4,
           top: canvas.height / 4,
