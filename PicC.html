@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>簡單海報製作 (v1.1.1 底部工具列與尺寸修復版)</title>
+  <title>簡單海報製作 (v1.1.2 置底與圖層修復版)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
@@ -17,6 +17,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      padding-bottom: 60px; /* 為固定置底列留出空間 */
     }
 
     .app-header {
@@ -147,19 +148,24 @@
       overflow: hidden;
     }
 
-    /* 底部常駐功能列 (移至最下方的 4 個核心操作) */
+    /* 手機端強放置底常駐列 (Fixed) */
     .bottom-actions {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
       padding: 8px 10px;
-      background: rgba(255, 255, 255, 0.85);
-      border-top: 1px solid rgba(60, 45, 20, 0.2);
-      margin-top: auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-top: 1px solid rgba(60, 45, 20, 0.25);
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
     }
 
     .bottom-actions button {
-      height: 40px;
+      height: 42px;
       padding: 2px;
       font-size: 13px;
       border-radius: 6px;
@@ -190,7 +196,7 @@
 
   <div class="app-header">
     <h1>簡單海報製作</h1>
-    <span class="version-tag">v1.1.1 修復穩定版</span>
+    <span class="version-tag">v1.1.2 穩定版</span>
   </div>
 
   <div class="tab-bar">
@@ -201,7 +207,7 @@
 
   <div class="control-panel">
     
-    <!-- 分頁 1: 設定底圖大小與底色 (單列整合) -->
+    <!-- 分頁 1: 底圖設定 -->
     <div id="canvasTab" class="tab-content active">
       <div class="form-row">
         <div class="compact-field" style="flex: 0 0 75px;">
@@ -243,7 +249,7 @@
       <div id="status">點擊上方按鈕選擇圖片...</div>
     </div>
 
-    <!-- 分頁 3: 文字編輯 (單列整合) -->
+    <!-- 分頁 3: 文字編輯 -->
     <div id="textTab" class="tab-content">
       <input type="text" id="textInput" placeholder="請輸入文字..." value="特惠商品 5 折起">
       
@@ -272,14 +278,14 @@
 
   </div>
 
-  <!-- 畫布主要區域 -->
+  <!-- 畫布區域 -->
   <div class="main-content">
     <div class="canvas-container-wrapper">
       <canvas id="c" width="350" height="350"></canvas>
     </div>
   </div>
 
-  <!-- 底部常駐功能列 (移至最下方) -->
+  <!-- 固定置底列 (手機電腦皆可見) -->
   <div class="bottom-actions">
     <button id="bringToFrontBtn" class="btn-layer">🔝 移至最前</button>
     <button id="sendToBackBtn" class="btn-layer">⬇️ 移至最後</button>
@@ -304,14 +310,14 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       var canvas = new fabric.Canvas('c', {
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        preserveObjectStacking: true // 保留物件堆疊層級
       });
 
       var canvasWidthInput = document.getElementById('canvasWidthInput');
       var canvasHeightInput = document.getElementById('canvasHeightInput');
       var applyCanvasSizeBtn = document.getElementById('applyCanvasSizeBtn');
 
-      // 初始化裝置預設尺寸（僅執行一次，後續調整由使用者完全掌控，不再隨 resize 變動）
       var initWidth = Math.min(window.innerWidth - 24, 380);
       canvas.setWidth(initWidth);
       canvas.setHeight(initWidth);
@@ -319,34 +325,28 @@
       canvasHeightInput.value = initWidth;
       canvas.renderAll();
 
-      // 修改底圖尺寸核心邏輯
       function updateCanvasSize(e) {
         if (e) e.preventDefault();
         
-        // 取得並轉化數值，避免手機端字串傳遞異常
         var w = parseInt(String(canvasWidthInput.value).trim(), 10);
         var h = parseInt(String(canvasHeightInput.value).trim(), 10);
 
         if (isNaN(w) || w <= 0) w = 350;
         if (isNaN(h) || h <= 0) h = 350;
 
-        // 更新控制項顯示正規化後的數字
         canvasWidthInput.value = w;
         canvasHeightInput.value = h;
 
-        // 設定 Fabric.js 畫布內部解析度與外觀 DOM 尺寸
         canvas.setWidth(w);
         canvas.setHeight(h);
         canvas.calcOffset();
         canvas.renderAll();
 
-        // 點擊後讓手機虛擬鍵盤失焦收起
         canvasWidthInput.blur();
         canvasHeightInput.blur();
       }
 
       applyCanvasSizeBtn.addEventListener('click', updateCanvasSize);
-      applyCanvasSizeBtn.addEventListener('touchend', updateCanvasSize);
 
       var statusEl = document.getElementById('status');
       var imageInput = document.getElementById('imageInput');
@@ -370,7 +370,7 @@
         rangeVal.innerText = e.target.value;
       });
 
-      // 滴管吸色邏輯
+      // 吸色邏輯 (判斷手機/電腦支援度)
       pickColorBtn.addEventListener('click', function() {
         if ('EyeDropper' in window) {
           const eyeDropper = new EyeDropper();
@@ -378,9 +378,10 @@
             targetColorPicker.value = result.sRGBHex;
             statusEl.innerText = "已選取背景色：" + result.sRGBHex + "，可點擊「執行消除」！";
           }).catch(e => {
-            console.log("吸管取消或不支援");
+            console.log("吸管取消");
           });
         } else {
+          statusEl.innerText = "提示：手機瀏覽器不支援畫面實體吸管，已開啓色盤選色。";
           targetColorPicker.click();
         }
       });
@@ -395,7 +396,7 @@
             canvas.add(img);
             canvas.centerObject(img);
             canvas.setActiveObject(img);
-            statusEl.innerText = "圖片已上傳！請用「吸取去背色」選色後點擊去背。";
+            statusEl.innerText = "圖片已上傳！請選色後點擊去背。";
             bgControls.style.display = "flex";
           });
         }
@@ -417,7 +418,7 @@
           activeObj.filters.push(filter);
           activeObj.applyFilters();
           canvas.renderAll();
-          statusEl.innerText = "去背完成！（消除顏色: " + selectedColor + ", 靈敏度: " + threshold + "）";
+          statusEl.innerText = "去背完成！（消除顏色: " + selectedColor + "）";
         } else {
           alert("請先點選畫布上的圖片！");
         }
@@ -473,22 +474,27 @@
         }
       });
 
-      // 底部常駐：圖層與刪除控制
+      // 修復：圖層移至最前
       bringToFrontBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj) {
           canvas.bringToFront(activeObj);
-          canvas.renderAll();
+          canvas.discardActiveObject();
+          canvas.setActiveObject(activeObj);
+          canvas.requestRenderAll();
         } else {
           alert("請先點選畫布上的物件！");
         }
       });
 
+      // 修復：圖層移至最後
       sendToBackBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj) {
           canvas.sendToBack(activeObj);
-          canvas.renderAll();
+          canvas.discardActiveObject();
+          canvas.setActiveObject(activeObj);
+          canvas.requestRenderAll();
         } else {
           alert("請先點選畫布上的物件！");
         }
