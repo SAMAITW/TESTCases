@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>簡單海報製作 (v1.1.2 置底與圖層修復版)</title>
+  <title>簡單海報製作 (v1.2.0 畫筆版)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
@@ -17,30 +17,24 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      padding-bottom: 60px; /* 為固定置底列留出空間 */
+      padding-bottom: 60px;
     }
 
     .app-header {
-      background: rgba(255, 255, 255, 0.5);
-      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.4);
+      padding: 4px 10px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       border-bottom: 1px solid rgba(60, 45, 20, 0.15);
     }
 
-    .app-header h1 {
-      font-size: 17px;
-      font-weight: bold;
-      color: #3a2e18;
-    }
-
     .version-tag {
-      font-size: 11px;
-      color: #6c5d47;
+      font-size: 10px;
+      color: #5c4d37;
       background: rgba(255, 255, 255, 0.85);
-      padding: 2px 6px;
-      border-radius: 10px;
+      padding: 1px 5px;
+      border-radius: 8px;
       font-weight: bold;
     }
 
@@ -52,10 +46,10 @@
 
     .tab-btn {
       flex: 1;
-      padding: 10px 4px;
+      padding: 10px 2px;
       background: transparent;
       border: none;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       color: #4a3b22;
       cursor: pointer;
@@ -63,7 +57,7 @@
     }
 
     .tab-btn.active {
-      background: rgba(255, 255, 255, 0.75);
+      background: rgba(255, 255, 255, 0.8);
       color: #000000;
       border-bottom: 3px solid #d97706;
     }
@@ -130,6 +124,8 @@
     .btn-delete { background: #a83232; color: #ffffff; font-weight: bold; }
     .btn-download { background: #2d7a42; color: #ffffff; font-weight: bold; }
     .btn-layer { background: #3b6282; color: #ffffff; font-weight: bold; }
+    .btn-toggle { background: #6b7280; color: #ffffff; font-weight: bold; }
+    .btn-toggle.active { background: #10b981; }
 
     .main-content {
       flex: 1;
@@ -148,7 +144,6 @@
       overflow: hidden;
     }
 
-    /* 手機端強放置底常駐列 (Fixed) */
     .bottom-actions {
       position: fixed;
       bottom: 0;
@@ -194,15 +189,17 @@
 </head>
 <body>
 
+  <!-- 極簡化頂部，僅留小版號 -->
   <div class="app-header">
-    <h1>簡單海報製作</h1>
-    <span class="version-tag">v1.1.2 穩定版</span>
+    <span class="version-tag">v1.2.0</span>
   </div>
 
+  <!-- 分頁列新增 🖌️ 標記畫筆 -->
   <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('canvasTab', this)">📐 底圖設定</button>
-    <button class="tab-btn" onclick="switchTab('imageTab', this)">📷 上傳圖片</button>
-    <button class="tab-btn" onclick="switchTab('textTab', this)">✍️ 編輯文字</button>
+    <button class="tab-btn active" onclick="switchTab('canvasTab', this)">📐 底圖</button>
+    <button class="tab-btn" onclick="switchTab('imageTab', this)">📷 上傳圖</button>
+    <button class="tab-btn" onclick="switchTab('textTab', this)">✍️ 文字</button>
+    <button class="tab-btn" onclick="switchTab('brushTab', this)">🖌️ 標記畫筆</button>
   </div>
 
   <div class="control-panel">
@@ -276,6 +273,26 @@
       <button id="addTextBtn" class="btn-action">＋ 新增文字</button>
     </div>
 
+    <!-- 分頁 4: 標記畫筆 (新功能) -->
+    <div id="brushTab" class="tab-content">
+      <div class="form-row">
+        <button id="toggleBrushBtn" class="btn-toggle" style="flex: 1;">✏️ 開啟畫筆模式</button>
+        <button id="eraserBtn" class="btn-action" style="flex: 1;">🧹 橡皮擦模式</button>
+      </div>
+
+      <div class="form-row">
+        <div class="compact-field" style="flex: 0 0 90px;">
+          <label>筆刷顏色:</label>
+          <input type="color" id="brushColorPicker" value="#ef4444">
+        </div>
+        <div class="compact-field">
+          <label>粗細:</label>
+          <input type="range" id="brushSizeRange" min="2" max="60" value="8">
+          <span id="brushSizeVal" style="font-weight: bold; min-width: 28px; font-size: 13px;">8</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- 畫布區域 -->
@@ -285,7 +302,7 @@
     </div>
   </div>
 
-  <!-- 固定置底列 (手機電腦皆可見) -->
+  <!-- 固定置底列 -->
   <div class="bottom-actions">
     <button id="bringToFrontBtn" class="btn-layer">🔝 移至最前</button>
     <button id="sendToBackBtn" class="btn-layer">⬇️ 移至最後</button>
@@ -294,6 +311,19 @@
   </div>
 
   <script>
+    var globalCanvas = null;
+
+    function disableDrawingMode() {
+      if (globalCanvas) {
+        globalCanvas.isDrawingMode = false;
+        var toggleBtn = document.getElementById('toggleBrushBtn');
+        if (toggleBtn) {
+          toggleBtn.innerText = "✏️ 開啟畫筆模式";
+          toggleBtn.classList.remove('active');
+        }
+      }
+    }
+
     function switchTab(tabId, btnElement) {
       var contents = document.querySelectorAll('.tab-content');
       for (var i = 0; i < contents.length; i++) {
@@ -306,13 +336,24 @@
 
       document.getElementById(tabId).classList.add('active');
       btnElement.classList.add('active');
+
+      // 切換非畫筆分頁時，自動關閉畫筆模式
+      if (tabId !== 'brushTab') {
+        disableDrawingMode();
+      }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
       var canvas = new fabric.Canvas('c', {
         backgroundColor: '#ffffff',
-        preserveObjectStacking: true // 保留物件堆疊層級
+        preserveObjectStacking: true
       });
+      globalCanvas = canvas;
+
+      // 初始化筆刷設定
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+      canvas.freeDrawingBrush.color = '#ef4444';
+      canvas.freeDrawingBrush.width = 8;
 
       var canvasWidthInput = document.getElementById('canvasWidthInput');
       var canvasHeightInput = document.getElementById('canvasHeightInput');
@@ -366,20 +407,57 @@
       var fontSizeInput = document.getElementById('fontSizeInput');
       var fontFamilySelect = document.getElementById('fontFamilySelect');
 
+      // 畫筆控制項
+      var toggleBrushBtn = document.getElementById('toggleBrushBtn');
+      var eraserBtn = document.getElementById('eraserBtn');
+      var brushColorPicker = document.getElementById('brushColorPicker');
+      var brushSizeRange = document.getElementById('brushSizeRange');
+      var brushSizeVal = document.getElementById('brushSizeVal');
+
+      toggleBrushBtn.addEventListener('click', function() {
+        canvas.isDrawingMode = !canvas.isDrawingMode;
+        if (canvas.isDrawingMode) {
+          toggleBrushBtn.innerText = "🛑 關閉畫筆模式";
+          toggleBrushBtn.classList.add('active');
+          canvas.freeDrawingBrush.color = brushColorPicker.value;
+        } else {
+          toggleBrushBtn.innerText = "✏️ 開啟畫筆模式";
+          toggleBrushBtn.classList.remove('active');
+        }
+      });
+
+      eraserBtn.addEventListener('click', function() {
+        if (!canvas.isDrawingMode) {
+          canvas.isDrawingMode = true;
+          toggleBrushBtn.innerText = "🛑 關閉畫筆模式";
+          toggleBrushBtn.classList.add('active');
+        }
+        // 擦拭效果：將顏色改為與底圖相同的顏色
+        var bgColor = canvas.backgroundColor || '#ffffff';
+        canvas.freeDrawingBrush.color = bgColor;
+      });
+
+      brushColorPicker.addEventListener('input', function(e) {
+        canvas.freeDrawingBrush.color = e.target.value;
+      });
+
+      brushSizeRange.addEventListener('input', function(e) {
+        var size = parseInt(e.target.value, 10);
+        brushSizeVal.innerText = size;
+        canvas.freeDrawingBrush.width = size;
+      });
+
       distanceRange.addEventListener('input', function(e) {
         rangeVal.innerText = e.target.value;
       });
 
-      // 吸色邏輯 (判斷手機/電腦支援度)
       pickColorBtn.addEventListener('click', function() {
         if ('EyeDropper' in window) {
           const eyeDropper = new EyeDropper();
           eyeDropper.open().then(result => {
             targetColorPicker.value = result.sRGBHex;
             statusEl.innerText = "已選取背景色：" + result.sRGBHex + "，可點擊「執行消除」！";
-          }).catch(e => {
-            console.log("吸管取消");
-          });
+          }).catch(e => {});
         } else {
           statusEl.innerText = "提示：手機瀏覽器不支援畫面實體吸管，已開啓色盤選色。";
           targetColorPicker.click();
@@ -402,7 +480,6 @@
         }
       });
 
-      // 去除指定顏色
       removeBgColorBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj && activeObj.type === 'image') {
@@ -474,7 +551,6 @@
         }
       });
 
-      // 修復：圖層移至最前
       bringToFrontBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj) {
@@ -487,7 +563,6 @@
         }
       });
 
-      // 修復：圖層移至最後
       sendToBackBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj) {
