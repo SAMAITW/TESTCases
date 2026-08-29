@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>簡單海報製作 (v1.1.0 自訂顏色去背版)</title>
+  <title>簡單海報製作 (v1.1.1 底部工具列與尺寸修復版)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
@@ -41,23 +41,6 @@
       padding: 2px 6px;
       border-radius: 10px;
       font-weight: bold;
-    }
-
-    /* 全局常駐操作按鈕區 (頂部 4 按鈕) */
-    .global-actions {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      padding: 8px 10px;
-      background: rgba(255, 255, 255, 0.85);
-      border-bottom: 1px solid rgba(60, 45, 20, 0.2);
-    }
-
-    .global-actions button {
-      height: 38px;
-      padding: 2px;
-      font-size: 13px;
-      border-radius: 6px;
     }
 
     .tab-bar {
@@ -153,7 +136,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 10px 8px;
+      padding: 12px 8px;
+      overflow: auto;
     }
 
     .canvas-container-wrapper {
@@ -161,6 +145,24 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.18);
       border-radius: 12px;
       overflow: hidden;
+    }
+
+    /* 底部常駐功能列 (移至最下方的 4 個核心操作) */
+    .bottom-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.85);
+      border-top: 1px solid rgba(60, 45, 20, 0.2);
+      margin-top: auto;
+    }
+
+    .bottom-actions button {
+      height: 40px;
+      padding: 2px;
+      font-size: 13px;
+      border-radius: 6px;
     }
 
     #status {
@@ -188,15 +190,7 @@
 
   <div class="app-header">
     <h1>簡單海報製作</h1>
-    <span class="version-tag">v1.1.0 自訂去背色版</span>
-  </div>
-
-  <!-- 置頂常駐功能列 -->
-  <div class="global-actions">
-    <button id="bringToFrontBtn" class="btn-layer">🔝 移至最前</button>
-    <button id="sendToBackBtn" class="btn-layer">⬇️ 移至最後</button>
-    <button id="deleteBtn" class="btn-delete">🗑️ 刪除選取</button>
-    <button id="downloadBtn" class="btn-download">💾 下載圖</button>
+    <span class="version-tag">v1.1.1 修復穩定版</span>
   </div>
 
   <div class="tab-bar">
@@ -207,7 +201,7 @@
 
   <div class="control-panel">
     
-    <!-- 分頁 1: 設定底圖大小與底色 -->
+    <!-- 分頁 1: 設定底圖大小與底色 (單列整合) -->
     <div id="canvasTab" class="tab-content active">
       <div class="form-row">
         <div class="compact-field" style="flex: 0 0 75px;">
@@ -216,11 +210,11 @@
         </div>
         <div class="compact-field">
           <label>寬:</label>
-          <input type="number" id="canvasWidthInput" value="350" min="100" max="2000" step="10">
+          <input type="number" id="canvasWidthInput" value="350" min="50" max="3000" step="10">
         </div>
         <div class="compact-field">
           <label>高:</label>
-          <input type="number" id="canvasHeightInput" value="350" min="100" max="2000" step="10">
+          <input type="number" id="canvasHeightInput" value="350" min="50" max="3000" step="10">
         </div>
         <button id="applyCanvasSizeBtn" class="btn-action" style="flex: 0 0 60px;">套用</button>
       </div>
@@ -249,7 +243,7 @@
       <div id="status">點擊上方按鈕選擇圖片...</div>
     </div>
 
-    <!-- 分頁 3: 文字部分 -->
+    <!-- 分頁 3: 文字編輯 (單列整合) -->
     <div id="textTab" class="tab-content">
       <input type="text" id="textInput" placeholder="請輸入文字..." value="特惠商品 5 折起">
       
@@ -278,10 +272,19 @@
 
   </div>
 
+  <!-- 畫布主要區域 -->
   <div class="main-content">
     <div class="canvas-container-wrapper">
       <canvas id="c" width="350" height="350"></canvas>
     </div>
+  </div>
+
+  <!-- 底部常駐功能列 (移至最下方) -->
+  <div class="bottom-actions">
+    <button id="bringToFrontBtn" class="btn-layer">🔝 移至最前</button>
+    <button id="sendToBackBtn" class="btn-layer">⬇️ 移至最後</button>
+    <button id="deleteBtn" class="btn-delete">🗑️ 刪除選取</button>
+    <button id="downloadBtn" class="btn-download">💾 下載圖</button>
   </div>
 
   <script>
@@ -308,27 +311,42 @@
       var canvasHeightInput = document.getElementById('canvasHeightInput');
       var applyCanvasSizeBtn = document.getElementById('applyCanvasSizeBtn');
 
-      function resizeCanvasForMobile() {
-        var availableWidth = window.innerWidth - 20;
-        var availableHeight = window.innerHeight - 340;
-        var defaultSize = Math.max(Math.min(availableWidth, availableHeight, 500), 280);
-        
-        canvas.setWidth(defaultSize);
-        canvas.setHeight(defaultSize);
-        canvasWidthInput.value = defaultSize;
-        canvasHeightInput.value = defaultSize;
-        canvas.renderAll();
-      }
-      window.addEventListener('resize', resizeCanvasForMobile);
-      resizeCanvasForMobile();
+      // 初始化裝置預設尺寸（僅執行一次，後續調整由使用者完全掌控，不再隨 resize 變動）
+      var initWidth = Math.min(window.innerWidth - 24, 380);
+      canvas.setWidth(initWidth);
+      canvas.setHeight(initWidth);
+      canvasWidthInput.value = initWidth;
+      canvasHeightInput.value = initWidth;
+      canvas.renderAll();
 
-      applyCanvasSizeBtn.addEventListener('click', function() {
-        var w = parseInt(canvasWidthInput.value, 10) || 350;
-        var h = parseInt(canvasHeightInput.value, 10) || 350;
+      // 修改底圖尺寸核心邏輯
+      function updateCanvasSize(e) {
+        if (e) e.preventDefault();
+        
+        // 取得並轉化數值，避免手機端字串傳遞異常
+        var w = parseInt(String(canvasWidthInput.value).trim(), 10);
+        var h = parseInt(String(canvasHeightInput.value).trim(), 10);
+
+        if (isNaN(w) || w <= 0) w = 350;
+        if (isNaN(h) || h <= 0) h = 350;
+
+        // 更新控制項顯示正規化後的數字
+        canvasWidthInput.value = w;
+        canvasHeightInput.value = h;
+
+        // 設定 Fabric.js 畫布內部解析度與外觀 DOM 尺寸
         canvas.setWidth(w);
         canvas.setHeight(h);
+        canvas.calcOffset();
         canvas.renderAll();
-      });
+
+        // 點擊後讓手機虛擬鍵盤失焦收起
+        canvasWidthInput.blur();
+        canvasHeightInput.blur();
+      }
+
+      applyCanvasSizeBtn.addEventListener('click', updateCanvasSize);
+      applyCanvasSizeBtn.addEventListener('touchend', updateCanvasSize);
 
       var statusEl = document.getElementById('status');
       var imageInput = document.getElementById('imageInput');
@@ -363,7 +381,6 @@
             console.log("吸管取消或不支援");
           });
         } else {
-          // 不支援滴管 API 時，直接觸發顏色選擇器
           targetColorPicker.click();
         }
       });
@@ -456,7 +473,7 @@
         }
       });
 
-      // 圖層控制
+      // 底部常駐：圖層與刪除控制
       bringToFrontBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj) {
