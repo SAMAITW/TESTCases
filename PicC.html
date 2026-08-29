@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>簡單海報製作 (v1.0.4 手機分頁版)</title>
+  <title>簡單海報製作 (v1.0.5 手機大字版)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
@@ -11,19 +11,19 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", "Segoe UI", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", sans-serif;
       background-color: #c0ab79;
       color: #2c2416;
       display: flex;
       flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    /* 頂部標題與版本 */
+    /* 頂部標題列：加大字體 */
     .app-header {
-      background: rgba(255, 255, 255, 0.4);
-      padding: 10px 15px;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -31,31 +31,33 @@
     }
 
     .app-header h1 {
-      font-size: 18px;
+      font-size: 20px;
+      font-weight: bold;
       color: #3a2e18;
     }
 
     .version-tag {
-      font-size: 11px;
+      font-size: 13px;
       color: #6c5d47;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 2px 6px;
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: bold;
     }
 
-    /* 上方 Tab 分頁按鈕列 */
+    /* 頂部 Tab 分頁按鈕列：大按鈕大字體 */
     .tab-bar {
       display: flex;
-      background: rgba(60, 45, 20, 0.1);
-      border-bottom: 1px solid rgba(60, 45, 20, 0.2);
+      background: rgba(60, 45, 20, 0.15);
+      border-bottom: 2px solid rgba(60, 45, 20, 0.2);
     }
 
     .tab-btn {
       flex: 1;
-      padding: 12px 5px;
+      padding: 14px 5px;
       background: transparent;
       border: none;
-      font-size: 14px;
+      font-size: 16px; /* 手機舒適大字 */
       font-weight: bold;
       color: #4a3b22;
       cursor: pointer;
@@ -64,19 +66,18 @@
     }
 
     .tab-btn.active {
-      background: rgba(255, 255, 255, 0.7);
-      color: #2c2416;
-      border-bottom: 3px solid #d97706;
+      background: rgba(255, 255, 255, 0.85);
+      color: #000000;
+      border-bottom: 4px solid #d97706;
     }
 
-    /* 控制面板區域 (根據 Tab 切換) */
+    /* 控制面板區域 */
     .control-panel {
-      background: rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(10px);
-      padding: 15px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-      min-height: 120px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      padding: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
     .tab-content {
@@ -86,46 +87,49 @@
     .tab-content.active {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
-    /* 表單元件樣式 */
+    /* 表單元件大字體與高觸控面積 */
     .form-row {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: center;
     }
 
     .form-row label {
-      font-size: 13px;
+      font-size: 16px;
       color: #2c2416;
       white-space: nowrap;
-      min-width: 70px;
-      font-weight: 500;
+      min-width: 80px;
+      font-weight: bold;
     }
 
     button, input[type="file"], input[type="color"], input[type="text"], input[type="number"], select {
       width: 100%;
-      padding: 10px;
-      border: 1px solid rgba(60, 45, 20, 0.3);
-      border-radius: 6px;
-      font-size: 14px;
+      height: 48px; /* 大觸控高度 */
+      padding: 8px 12px;
+      border: 1px solid rgba(60, 45, 20, 0.35);
+      border-radius: 8px;
+      font-size: 16px; /* 避免 iOS 自動放大 */
       background: #ffffff;
       color: #2c2416;
     }
 
-    .btn-action {
-      background: #4a3b22;
-      color: #ffffff;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
+    input[type="file"] {
       padding: 10px;
+      height: auto;
     }
 
-    .btn-magic { background: #d97706; color: #fff; border: none; font-weight: bold; }
-    .btn-delete { background: #a83232; color: #fff; border: none; font-weight: bold; }
-    .btn-download { background: #2d7a42; color: #fff; border: none; font-weight: bold; font-size: 15px; }
+    input[type="color"] {
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .btn-action { background: #4a3b22; color: #ffffff; font-weight: bold; font-size: 17px; }
+    .btn-magic { background: #d97706; color: #ffffff; font-weight: bold; font-size: 17px; }
+    .btn-delete { background: #a83232; color: #ffffff; font-weight: bold; font-size: 17px; }
+    .btn-download { background: #2d7a42; color: #ffffff; font-weight: bold; font-size: 18px; }
 
     /* 中央畫布區域 */
     .main-content {
@@ -134,245 +138,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 15px;
-      overflow: hidden;
+      padding: 16px 10px;
     }
 
-    .canvas-container-wrapper {
-      background: #ffffff;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-      border-radius: 12px;
-      overflow: hidden;
-      touch-action: none; /* 改善手機觸控操作 */
-    }
-
-    #status {
-      font-size: 12px;
-      color: #4a3b22;
-      font-weight: bold;
-      background: rgba(255,255,255,0.6);
-      padding: 6px 10px;
-      border-radius: 4px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="app-header">
-    <h1>簡單海報製作</h1>
-    <span class="version-tag">v1.0.4 手機分頁版</span>
-  </div>
-
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('imageTab', this)">📷 圖片上傳</button>
-    <button class="tab-btn" onclick="switchTab('textTab', this)">✍️ 文字編輯</button>
-    <button class="tab-btn" onclick="switchTab('exportTab', this)">🎨 底色與儲存</button>
-  </div>
-
-  <div class="control-panel">
-    
-    <div id="imageTab" class="tab-content active">
-      <input type="file" id="imageInput" accept="image/*">
-      <button id="removeBgColorBtn" class="btn-magic" style="display:none;">🪄 點選圖片消除白底</button>
-      <div id="status">請先上傳圖片...</div>
-    </div>
-
-    <div id="textTab" class="tab-content">
-      <input type="text" id="textInput" placeholder="請輸入文字..." value="特惠商品 5 折起">
-      
-      <div class="form-row">
-        <label>顏色：</label>
-        <input type="color" id="textColorPicker" value="#2c2416">
-        <label style="min-width:40px; margin-left:10px;">大小：</label>
-        <input type="number" id="fontSizeInput" value="32" min="12" max="120">
-      </div>
-
-      <div class="form-row">
-        <label>字體：</label>
-        <select id="fontFamilySelect">
-          <option value="Microsoft JhengHei">微軟正黑體</option>
-          <option value="sans-serif">預設無襯線體</option>
-          <option value="DFKai-SB">標楷體</option>
-          <option value="PMingLiU">新細明體</option>
-          <option value="Impact">粗體英文 (Impact)</option>
-        </select>
-      </div>
-
-      <div class="form-row" style="margin-top: 4px;">
-        <button id="addTextBtn" class="btn-action">＋ 新增文字</button>
-        <button id="deleteBtn" class="btn-delete">🗑️ 刪除選取</button>
-      </div>
-    </div>
-
-    <div id="exportTab" class="tab-content">
-      <div class="form-row">
-        <label>畫布底色：</label>
-        <input type="color" id="bgColorPicker" value="#ffffff">
-      </div>
-      <button id="downloadBtn" class="btn-download" style="margin-top: 8px;">💾 下載海報圖片</button>
-    </div>
-
-  </div>
-
-  <div class="main-content">
-    <div class="canvas-container-wrapper">
-      <canvas id="c" width="400" height="400"></canvas>
-    </div>
-  </div>
-
-  <script>
-    console.log("【PicC.html】已載入手機 Tab 分頁版：v1.0.4");
-
-    // 切換 Tab 分頁邏輯
-    function switchTab(tabId, btnElement) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-      document.getElementById(tabId).classList.add('active');
-      btnElement.classList.add('active');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const canvas = new fabric.Canvas('c', {
-        backgroundColor: '#ffffff'
-      });
-
-      // 根據手機螢幕動態調整畫布尺寸
-      function resizeCanvasForMobile() {
-        const availableWidth = window.innerWidth - 30;
-        const availableHeight = window.innerHeight - 260; // 扣除 Header 與 Panel 高度
-        const size = Math.min(availableWidth, availableHeight, 500);
-        
-        canvas.setWidth(size);
-        canvas.setHeight(size);
-        canvas.renderAll();
-      }
-      window.addEventListener('resize', resizeCanvasForMobile);
-      resizeCanvasForMobile();
-
-      const statusEl = document.getElementById('status');
-      const imageInput = document.getElementById('imageInput');
-      const removeBgColorBtn = document.getElementById('removeBgColorBtn');
-      const deleteBtn = document.getElementById('deleteBtn');
-      const textColorPicker = document.getElementById('textColorPicker');
-      const fontSizeInput = document.getElementById('fontSizeInput');
-      const fontFamilySelect = document.getElementById('fontFamilySelect');
-
-      // 1. 上傳圖片
-      imageInput.addEventListener('change', function(e) {
-        if (e.target.files.length > 0) {
-          const file = e.target.files[0];
-          const url = URL.createObjectURL(file);
-
-          fabric.Image.fromURL(url, function(img) {
-            img.scaleToWidth(canvas.width * 0.7);
-            canvas.add(img);
-            canvas.centerObject(img);
-            canvas.setActiveObject(img);
-            statusEl.innerText = "圖片已上傳！點擊下方按鈕可消除圖片白底。";
-            removeBgColorBtn.style.display = "block";
-          });
-        }
-      });
-
-      // 2. 消除白底
-      removeBgColorBtn.addEventListener('click', function() {
-        const activeObj = canvas.getActiveObject();
-        if (activeObj && activeObj.type === 'image') {
-          const filter = new fabric.Image.filters.RemoveColor({
-            color: '#FFFFFF',
-            distance: 0.2
-          });
-          activeObj.filters.push(filter);
-          activeObj.applyFilters();
-          canvas.renderAll();
-          statusEl.innerText = "已成功消除白色背景！";
-        } else {
-          alert("請先在畫布上點選您上傳的圖片！");
-        }
-      });
-
-      // 3. 新增文字
-      document.getElementById('addTextBtn').addEventListener('click', function() {
-        const val = document.getElementById('textInput').value || '預設文字';
-        const text = new fabric.Text(val, {
-          left: canvas.width / 4,
-          top: canvas.height / 4,
-          fontSize: parseInt(fontSizeInput.value, 10) || 32,
-          fill: textColorPicker.value,
-          fontFamily: fontFamilySelect.value,
-          fontWeight: 'bold'
-        });
-        canvas.add(text);
-        canvas.setActiveObject(text);
-      });
-
-      // 4. 即時同步文字樣式
-      canvas.on('selection:created', updateControlPanel);
-      canvas.on('selection:updated', updateControlPanel);
-
-      function updateControlPanel() {
-        const activeObj = canvas.getActiveObject();
-        if (activeObj && activeObj.type === 'text') {
-          textColorPicker.value = activeObj.fill;
-          fontSizeInput.value = activeObj.fontSize;
-          fontFamilySelect.value = activeObj.fontFamily;
-        }
-      }
-
-      textColorPicker.addEventListener('input', function(e) {
-        const activeObj = canvas.getActiveObject();
-        if (activeObj && activeObj.type === 'text') {
-          activeObj.set('fill', e.target.value);
-          canvas.renderAll();
-        }
-      });
-
-      fontSizeInput.addEventListener('input', function(e) {
-        const activeObj = canvas.getActiveObject();
-        if (activeObj && activeObj.type === 'text') {
-          activeObj.set('fontSize', parseInt(e.target.value, 10) || 20);
-          canvas.renderAll();
-        }
-      });
-
-      fontFamilySelect.addEventListener('change', function(e) {
-        const activeObj = canvas.getActiveObject();
-        if (activeObj && activeObj.type === 'text') {
-          activeObj.set('fontFamily', e.target.value);
-          canvas.renderAll();
-        }
-      });
-
-      // 5. 刪除
-      function deleteActiveObject() {
-        const activeObjects = canvas.getActiveObjects();
-        if (activeObjects && activeObjects.length > 0) {
-          activeObjects.forEach(obj => canvas.remove(obj));
-          canvas.discardActiveObject();
-          canvas.requestRenderAll();
-        }
-      }
-
-      deleteBtn.addEventListener('click', deleteActiveObject);
-
-      // 6. 底色
-      document.getElementById('bgColorPicker').addEventListener('input', function(e) {
-        canvas.setBackgroundColor(e.target.value, function() {
-          canvas.renderAll();
-        });
-      });
-
-      // 7. 匯出 PNG
-      document.getElementById('downloadBtn').addEventListener('click', function() {
-        const dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
-        const link = document.createElement('a');
-        link.download = '海報設計.png';
-        link.href = dataURL;
-        link.click();
-      });
-    });
-  </script>
-</body>
-</html>
+    .
