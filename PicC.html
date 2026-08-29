@@ -1,423 +1,1560 @@
 <!DOCTYPE html>
+
 <html lang="zh-TW">
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>多功能影像工具箱</title>
+
+  <title>簡單海報製作 (v1.3.0)</title>
+
+ 
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+
+
+
   <style>
-    /* 核心基礎樣式與版面配置 */
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
-      background: #f5f0e6;
+
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
+
+      background-color: #c0ab79;
+
       color: #2c2416;
-      padding: 12px;
-      padding-bottom: 80px;
-      min-height: 100vh;
-    }
 
-    /* 頁籤導覽列 (底部或頂部切換) */
-    .nav-tabs {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: #fff;
       display: flex;
-      border-top: 1px solid #e5dccb;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-      z-index: 1000;
-    }
-    .nav-tab {
-      flex: 1;
-      display: flex;
+
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: #786851;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .nav-tab.active {
-      color: #d97706;
-      background: #fffdf9;
+
+      min-height: 100vh;
+
+      padding-bottom: 60px;
+
     }
 
-    /* 分頁容器顯示控管 */
-    .tab-content {
-      display: none;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .tab-content.active {
-      display: block;
-    }
 
-    /* 簡單去背工具專用 CSS 樣式 (獨立命名空間避免衝突) */
-    .bg-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-    .bg-btn {
-      display: block;
-      width: 100%;
-      height: 48px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-    .bg-btn-primary { background: #d97706; color: #fff; }
-    .bg-btn-secondary { background: #4a3b22; color: #fff; }
-    .bg-btn-success { background: #2d7a42; color: #fff; }
-    .bg-btn-restore { background: #6b7280; color: #fff; }
-    .bg-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .bg-btn-row {
+
+    .app-header {
+
+      background: rgba(255, 255, 255, 0.4);
+
+      padding: 4px 10px;
+
       display: flex;
-      gap: 8px;
-    }
-    .bg-btn-row .bg-btn { flex: 1; margin-bottom: 0; }
-    .bg-slider-row {
-      display: flex;
+
       align-items: center;
+
+      justify-content: flex-end;
+
       gap: 10px;
-      margin-bottom: 8px;
+
+      border-bottom: 1px solid rgba(60, 45, 20, 0.15);
+
     }
-    .bg-slider-row span {
-      min-width: 28px;
-      font-weight: bold;
-      font-size: 15px;
-    }
-    .bg-status {
-      text-align: center;
-      font-size: 14px;
-      font-weight: bold;
+
+
+
+    .version-tag {
+
+      font-size: 10px;
+
       color: #5c4d37;
-      padding: 8px;
-      background: rgba(255,255,255,0.7);
+
+      background: rgba(255, 255, 255, 0.85);
+
+      padding: 1px 5px;
+
       border-radius: 8px;
-      margin-bottom: 12px;
+
+      font-weight: bold;
+
     }
-    .bg-preview-area { text-align: center; }
-    .bg-preview-area canvas {
-      max-width: 100%;
-      border-radius: 10px;
-      background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 50% / 14px 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .bg-hint {
-      font-size: 12px;
-      color: #666;
-      text-align: center;
-      margin-top: 8px;
-      line-height: 1.4;
-    }
-    .bg-color-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .bg-color-row input[type="color"] {
-      width: 52px;
-      height: 44px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 2px;
+
+
+
+    .lang-select {
+
+      height: 24px;
+
+      padding: 0 4px;
+
+      font-size: 11px;
+
+      border-radius: 4px;
+
+      border: 1px solid rgba(60, 45, 20, 0.3);
+
+      background: #ffffff;
+
+      color: #2c2416;
+
+      font-weight: bold;
+
+      width: auto;
+
       cursor: pointer;
+
     }
-    .bg-mode-tabs {
+
+
+
+    .tab-bar {
+
       display: flex;
-      gap: 6px;
-      margin-bottom: 12px;
+
+      background: rgba(60, 45, 20, 0.15);
+
+      border-bottom: 2px solid rgba(60, 45, 20, 0.2);
+
     }
-    .bg-mode-tab {
+
+
+
+    .tab-btn {
+
       flex: 1;
-      height: 40px;
-      border: 2px solid #d1c4a8;
-      background: #fff;
-      border-radius: 8px;
+
+      padding: 10px 2px;
+
+      background: transparent;
+
+      border: none;
+
       font-size: 13px;
+
       font-weight: bold;
-      color: #5c4d37;
+
+      color: #4a3b22;
+
       cursor: pointer;
+
+      text-align: center;
+
     }
-    .bg-mode-tab.active {
-      background: #d97706;
-      color: #fff;
-      border-color: #d97706;
+
+
+
+    .tab-btn.active {
+
+      background: rgba(255, 255, 255, 0.8);
+
+      color: #000000;
+
+      border-bottom: 3px solid #d97706;
+
     }
+
+
+
+    .control-panel {
+
+      background: rgba(255, 255, 255, 0.65);
+
+      padding: 10px 12px;
+
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+
+    }
+
+
+
+    .tab-content {
+
+      display: none;
+
+    }
+
+
+
+    .tab-content.active {
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 8px;
+
+    }
+
+
+
+    .form-row {
+
+      display: flex;
+
+      gap: 6px;
+
+      align-items: center;
+
+      width: 100%;
+
+    }
+
+
+
+    .form-row label {
+
+      font-size: 13px;
+
+      color: #2c2416;
+
+      white-space: nowrap;
+
+      font-weight: bold;
+
+    }
+
+
+
+    .compact-field {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 4px;
+
+      flex: 1;
+
+      min-width: 0;
+
+    }
+
+
+
+    button, input[type="file"], input[type="color"], input[type="text"], input[type="number"], select {
+
+      width: 100%;
+
+      height: 38px;
+
+      padding: 4px 6px;
+
+      border: 1px solid rgba(60, 45, 20, 0.35);
+
+      border-radius: 6px;
+
+      font-size: 14px;
+
+      background: #ffffff;
+
+      color: #2c2416;
+
+    }
+
+
+
+    input[type="range"] {
+
+      width: 100%;
+
+      height: 24px;
+
+    }
+
+
+
+    input[type="file"] { padding: 6px; height: auto; }
+
+    input[type="color"] { padding: 2px; cursor: pointer; min-width: 32px; }
+
+
+
+    .btn-action { background: #4a3b22; color: #ffffff; font-weight: bold; }
+
+    .btn-magic { background: #d97706; color: #ffffff; font-weight: bold; }
+
+    .btn-delete { background: #a83232; color: #ffffff; font-weight: bold; }
+
+    .btn-download { background: #2d7a42; color: #ffffff; font-weight: bold; }
+
+    .btn-layer { background: #3b6282; color: #ffffff; font-weight: bold; }
+
+    .btn-toggle { background: #6b7280; color: #ffffff; font-weight: bold; }
+
+    .btn-toggle.active { background: #10b981; }
+
+
+
+    .main-content {
+
+      flex: 1;
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      justify-content: center;
+
+      padding: 12px 8px;
+
+      overflow: auto;
+
+    }
+
+
+
+    .canvas-container-wrapper {
+
+      background: #ffffff;
+
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+
+      border-radius: 12px;
+
+      overflow: hidden;
+
+    }
+
+
+
+    .bottom-actions {
+
+      position: fixed;
+
+      bottom: 0;
+
+      left: 0;
+
+      right: 0;
+
+      z-index: 9999;
+
+      display: grid;
+
+      grid-template-columns: repeat(4, 1fr);
+
+      gap: 6px;
+
+      padding: 8px 10px;
+
+      background: rgba(255, 255, 255, 0.95);
+
+      border-top: 1px solid rgba(60, 45, 20, 0.25);
+
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+
+    }
+
+
+
+    .bottom-actions button {
+
+      height: 42px;
+
+      padding: 2px;
+
+      font-size: 13px;
+
+      border-radius: 6px;
+
+    }
+
+
+
+    #status {
+
+      font-size: 12px;
+
+      color: #3a2e18;
+
+      font-weight: bold;
+
+      background: rgba(255,255,255,0.8);
+
+      padding: 4px 8px;
+
+      border-radius: 6px;
+
+      text-align: center;
+
+    }
+
+
+
+    .bg-controls {
+
+      display: none;
+
+      flex-direction: column;
+
+      gap: 8px;
+
+      background: rgba(255, 255, 255, 0.5);
+
+      padding: 8px;
+
+      border-radius: 8px;
+
+      border: 1px dashed rgba(60, 45, 20, 0.3);
+
+    }
+
   </style>
+
 </head>
+
 <body>
 
-  <!-- ==================== 分頁 1: 📷 上傳圖 (簡單去背工具) ==================== -->
-  <div id="tab-upload" class="tab-content active">
-    <h1 style="font-size:18px; text-align:center; margin-bottom:14px; color:#3a2e18;">簡單去背工具</h1>
-    
-    <div class="bg-status" id="bg-status">請先選擇一張圖片</div>
 
-    <div class="bg-card">
-      <input type="file" id="bg-fileInput" accept="image/*" style="width:100%; margin-bottom:12px; font-size:15px;">
-      
-      <div class="bg-mode-tabs">
-        <button type="button" class="bg-mode-tab active" id="bg-tabAuto">自動去背模式</button>
-        <button type="button" class="bg-mode-tab" id="bg-tabManual">手動選色模式</button>
-      </div>
 
-      <div id="bg-manualPanel" style="display:none;">
-        <div class="bg-color-row">
-          <label style="margin:0; font-size:14px; font-weight:bold;">要消除的顏色：</label>
-          <input type="color" id="bg-colorPicker" value="#ffffff">
-          <button type="button" class="bg-btn bg-btn-secondary" id="bg-sampleBtn" style="width:auto; height:44px; padding:0 14px; margin:0;">點圖取色</button>
+  <!-- 頂部：語系切換與版號 -->
+
+  <div class="app-header">
+
+    <select id="langSelect" class="lang-select">
+
+      <option value="zh">繁體中文</option>
+
+      <option value="en">English</option>
+
+    </select>
+
+    <span class="version-tag">v1.3.0</span>
+
+  </div>
+
+
+
+  <!-- 分頁列 -->
+
+  <div class="tab-bar">
+
+    <button class="tab-btn active" id="tabCanvasBtn" onclick="switchTab('canvasTab', this)">📐 底圖</button>
+
+    <button class="tab-btn" id="tabImageBtn" onclick="switchTab('imageTab', this)">📷 上傳圖</button>
+
+    <button class="tab-btn" id="tabTextBtn" onclick="switchTab('textTab', this)">✍️ 文字</button>
+
+    <button class="tab-btn" id="tabBrushBtn" onclick="switchTab('brushTab', this)">🖌️ 標記畫筆</button>
+
+  </div>
+
+
+
+  <div class="control-panel">
+
+   
+
+    <!-- 分頁 1: 底圖設定 -->
+
+    <div id="canvasTab" class="tab-content active">
+
+      <div class="form-row">
+
+        <div class="compact-field" style="flex: 0 0 75px;">
+
+          <label id="lblBgColor">底色:</label>
+
+          <input type="color" id="bgColorPicker" value="#ece6e4">
+
         </div>
+
+        <div class="compact-field">
+
+          <label id="lblWidth">寬:</label>
+
+          <input type="number" id="canvasWidthInput" value="380" min="50" max="3000" step="10">
+
+        </div>
+
+        <div class="compact-field">
+
+          <label id="lblHeight">高:</label>
+
+          <input type="number" id="canvasHeightInput" value="380" min="50" max="3000" step="10">
+
+        </div>
+
+        <button id="applyCanvasSizeBtn" class="btn-action" style="flex: 0 0 60px;">套用</button>
+
       </div>
 
-      <label style="font-size:14px; font-weight:bold; display:block; margin-bottom:6px;">去背強度（數字越大消除越多）</label>
-      <div class="bg-slider-row">
-        <input type="range" id="bg-strength" min="15" max="90" value="40" style="width:100%; height:32px;">
-        <span id="bg-strengthVal">40</span>
+    </div>
+
+
+
+    <!-- 分頁 2: 上傳圖片與去背控制 -->
+
+    <div id="imageTab" class="tab-content">
+
+      <input type="file" id="imageInput" accept="image/*">
+
+     
+
+      <div id="bgControls" class="bg-controls">
+
+        <div class="form-row">
+
+          <label id="lblTargetColor">目標去背色：</label>
+
+          <input type="color" id="targetColorPicker" value="#ffffff" style="flex: 0 0 45px;">
+
+          <button id="pickColorBtn" class="btn-action" style="flex: 1;">🧪 吸取去背色</button>
+
+        </div>
+
+
+
+        <div class="form-row">
+
+          <label id="lblSensitivity">靈敏度：</label>
+
+          <input type="range" id="distanceRange" min="0.05" max="0.5" step="0.01" value="0.15">
+
+          <span id="rangeVal" style="font-weight: bold; min-width: 35px; font-size: 13px;">0.15</span>
+
+        </div>
+
+       
+
+        <button id="removeBgColorBtn" class="btn-magic">🪄 執行消除指定背景色</button>
+
       </div>
 
-      <button type="button" class="bg-btn bg-btn-primary" id="bg-processBtn" disabled>開始清除背景</button>
-      
-      <div class="bg-btn-row" style="margin-bottom:10px;">
-        <button type="button" class="bg-btn bg-btn-restore" id="bg-restoreBtn" disabled>還原原圖</button>
-        <button type="button" class="bg-btn bg-btn-success" id="bg-downloadBtn" disabled>下載圖片</button>
+
+
+      <div id="status">點擊上方按鈕選擇圖片...</div>
+
+    </div>
+
+
+
+    <!-- 分頁 3: 文字編輯 -->
+
+    <div id="textTab" class="tab-content">
+
+      <input type="text" id="textInput" placeholder="請輸入文字..." value="請在這邊輸入文字">
+
+     
+
+      <div class="form-row">
+
+        <div class="compact-field" style="flex: 0 0 75px;">
+
+          <label id="lblTextColor">顏色:</label>
+
+          <input type="color" id="textColorPicker" value="#2c2416">
+
+        </div>
+
+        <div class="compact-field" style="flex: 0 0 85px;">
+
+          <label id="lblFontSize">大小:</label>
+
+          <input type="number" id="fontSizeInput" value="32" min="12" max="120">
+
+        </div>
+
+        <div class="compact-field">
+
+          <select id="fontFamilySelect">
+
+            <option value="Microsoft JhengHei">微軟正黑體</option>
+
+            <option value="sans-serif">預設無襯線體</option>
+
+            <option value="DFKai-SB">標楷體</option>
+
+            <option value="PMingLiU">新細明體</option>
+
+            <option value="Impact">Impact</option>
+
+          </select>
+
+        </div>
+
       </div>
+
+
+
+      <button id="addTextBtn" class="btn-action">＋ 新增文字</button>
+
     </div>
 
-    <div class="bg-card bg-preview-area">
-      <p style="font-size:13px; margin-bottom:8px; color:#666;" id="bg-previewLabel">預覽</p>
-      <canvas id="bg-canvas"></canvas>
-      <p class="bg-hint" id="bg-hint">選擇圖片後，按「開始清除背景」即可。不滿意可按「還原原圖」再重試。</p>
+
+
+    <!-- 分頁 4: 標記畫筆 -->
+
+    <div id="brushTab" class="tab-content">
+
+      <div class="form-row">
+
+        <button id="toggleBrushBtn" class="btn-toggle" style="flex: 1;">✏️ 開啟畫筆模式</button>
+
+        <button id="eraserBtn" class="btn-action" style="flex: 1;">🧹 橡皮擦模式</button>
+
+      </div>
+
+
+
+      <div class="form-row">
+
+        <div class="compact-field" style="flex: 0 0 90px;">
+
+          <label id="lblBrushColor">筆刷顏色:</label>
+
+          <input type="color" id="brushColorPicker" value="#ef4444">
+
+        </div>
+
+        <div class="compact-field">
+
+          <label id="lblBrushSize">粗細:</label>
+
+          <input type="range" id="brushSizeRange" min="2" max="60" value="8">
+
+          <span id="brushSizeVal" style="font-weight: bold; min-width: 28px; font-size: 13px;">8</span>
+
+        </div>
+
+      </div>
+
     </div>
+
+
+
   </div>
 
-  <!-- ==================== 分頁 2: 預留其他系統分頁 A ==================== -->
-  <div id="tab-other1" class="tab-content">
-    <h1 style="font-size:18px; text-align:center; margin-bottom:14px; color:#3a2e18;">其他功能模組 A</h1>
-    <div class="bg-card">
-      <p style="text-align:center; color:#666;">（此處維持您原本系統的功能內容）</p>
+
+
+  <!-- 畫布區域 -->
+
+  <div class="main-content">
+
+    <div class="canvas-container-wrapper">
+
+      <canvas id="c" width="380" height="380"></canvas>
+
     </div>
+
   </div>
 
-  <!-- ==================== 分頁 3: 預留其他系統分頁 B ==================== -->
-  <div id="tab-other2" class="tab-content">
-    <h1 style="font-size:18px; text-align:center; margin-bottom:14px; color:#3a2e18;">其他功能模組 B</h1>
-    <div class="bg-card">
-      <p style="text-align:center; color:#666;">（此處維持您原本系統的功能內容）</p>
-    </div>
+
+
+  <!-- 固定置底列 -->
+
+  <div class="bottom-actions">
+
+    <button id="bringToFrontBtn" class="btn-layer">🔝 移至最前</button>
+
+    <button id="sendToBackBtn" class="btn-layer">⬇️ 移至最後</button>
+
+    <button id="deleteBtn" class="btn-delete">🗑️ 刪除選取</button>
+
+    <button id="downloadBtn" class="btn-download">💾 下載圖</button>
+
   </div>
 
-  <!-- ==================== 底部導覽列 ==================== -->
-  <nav class="nav-tabs">
-    <button class="nav-tab active" onclick="switchTab('tab-upload', this)">📷 上傳圖</button>
-    <button class="nav-tab" onclick="switchTab('tab-other1', this)">⚙️ 功能 A</button>
-    <button class="nav-tab" onclick="switchTab('tab-other2', this)">🎨 功能 B</button>
-  </nav>
 
-  <!-- ==================== JavaScript 邏輯區塊 ==================== -->
+
   <script>
-    // 主系統分頁切換邏輯
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-      
-      document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
+
+    var globalCanvas = null;
+
+    var currentLang = 'zh';
+
+
+
+    // 多語系字典
+
+    var translations = {
+
+      zh: {
+
+        title: "簡單海報製作 (v1.3.0)",
+
+        tabCanvas: "📐 底圖",
+
+        tabImage: "📷 上傳圖",
+
+        tabText: "✍️ 文字",
+
+        tabBrush: "🖌️ 標記畫筆",
+
+        lblBgColor: "底色:",
+
+        lblWidth: "寬:",
+
+        lblHeight: "高:",
+
+        applyCanvasSizeBtn: "套用",
+
+        lblTargetColor: "目標去背色：",
+
+        pickColorBtn: "🧪 吸取去背色",
+
+        lblSensitivity: "靈敏度：",
+
+        removeBgColorBtn: "🪄 執行消除指定背景色",
+
+        statusSelectImg: "點擊上方按鈕選擇圖片...",
+
+        statusUploaded: "圖片已上傳！請選色後點擊去背。",
+
+        statusColorPicked: "已選取背景色：{color}，可點擊「執行消除」！",
+
+        statusColorPickNoSupport: "提示：手機瀏覽器不支援畫面實體吸管，已開啓色盤選色。",
+
+        statusBgRemoved: "去背完成！（消除顏色: {color}）",
+
+        textPlaceholder: "請輸入文字...",
+
+        defaultTextVal: "請在這邊輸入文字",
+
+        lblTextColor: "顏色:",
+
+        lblFontSize: "大小:",
+
+        addTextBtn: "＋ 新增文字",
+
+        brushOn: "✏️ 開啟畫筆模式",
+
+        brushOff: "🛑 關閉畫筆模式",
+
+        eraserBtn: "🧹 橡皮擦模式",
+
+        lblBrushColor: "筆刷顏色:",
+
+        lblBrushSize: "粗細:",
+
+        bringToFrontBtn: "🔝 移至最前",
+
+        sendToBackBtn: "⬇️ 移至最後",
+
+        deleteBtn: "🗑️ 刪除選取",
+
+        downloadBtn: "💾 下載圖",
+
+        alertSelectImg: "請先點選畫布上的圖片！",
+
+        alertSelectObj: "請先點選畫布上的物件！",
+
+        alertSelectObjDelete: "請先點選畫布上要刪除的物件！",
+
+        downloadFileName: "海報設計.png",
+
+        fontMicrosoft: "微軟正黑體",
+
+        fontSans: "預設無襯線體",
+
+        fontKai: "標楷體",
+
+        fontMing: "新細明體"
+
+      },
+
+      en: {
+
+        title: "Simple Poster Maker (v1.3.0)",
+
+        tabCanvas: "📐 Canvas",
+
+        tabImage: "📷 Image",
+
+        tabText: "✍️ Text",
+
+        tabBrush: "🖌️ Brush",
+
+        lblBgColor: "Color:",
+
+        lblWidth: "W:",
+
+        lblHeight: "H:",
+
+        applyCanvasSizeBtn: "Apply",
+
+        lblTargetColor: "Target Color:",
+
+        pickColorBtn: "🧪 EyeDropper",
+
+        lblSensitivity: "Tolerance:",
+
+        removeBgColorBtn: "🪄 Remove Target Color",
+
+        statusSelectImg: "Click above to select an image...",
+
+        statusUploaded: "Image uploaded! Pick color to remove background.",
+
+        statusColorPicked: "Color picked: {color}. Click 'Remove Target Color'!",
+
+        statusColorPickNoSupport: "Eyedropper not supported on this browser. Color picker opened.",
+
+        statusBgRemoved: "Background removed! (Color: {color})",
+
+        textPlaceholder: "Enter text...",
+
+        defaultTextVal: "Enter Text Here",
+
+        lblTextColor: "Color:",
+
+        lblFontSize: "Size:",
+
+        addTextBtn: "＋ Add Text",
+
+        brushOn: "✏️ Turn Brush ON",
+
+        brushOff: "🛑 Turn Brush OFF",
+
+        eraserBtn: "🧹 Eraser Mode",
+
+        lblBrushColor: "Color:",
+
+        lblBrushSize: "Size:",
+
+        bringToFrontBtn: "🔝 Front",
+
+        sendToBackBtn: "⬇️ Back",
+
+        deleteBtn: "🗑️ Delete",
+
+        downloadBtn: "💾 Save",
+
+        alertSelectImg: "Please select an image on canvas first!",
+
+        alertSelectObj: "Please select an object on canvas first!",
+
+        alertSelectObjDelete: "Please select object(s) to delete!",
+
+        downloadFileName: "poster_design.png",
+
+        fontMicrosoft: "Microsoft JhengHei",
+
+        fontSans: "Sans-Serif",
+
+        fontKai: "DFKai-SB",
+
+        fontMing: "PMingLiU"
+
+      }
+
+    };
+
+
+
+    function updateLanguage(lang) {
+
+      currentLang = lang;
+
+      var t = translations[lang];
+
+
+
+      document.title = t.title;
+
+      document.getElementById('tabCanvasBtn').innerText = t.tabCanvas;
+
+      document.getElementById('tabImageBtn').innerText = t.tabImage;
+
+      document.getElementById('tabTextBtn').innerText = t.tabText;
+
+      document.getElementById('tabBrushBtn').innerText = t.tabBrush;
+
+
+
+      document.getElementById('lblBgColor').innerText = t.lblBgColor;
+
+      document.getElementById('lblWidth').innerText = t.lblWidth;
+
+      document.getElementById('lblHeight').innerText = t.lblHeight;
+
+      document.getElementById('applyCanvasSizeBtn').innerText = t.applyCanvasSizeBtn;
+
+
+
+      document.getElementById('lblTargetColor').innerText = t.lblTargetColor;
+
+      document.getElementById('pickColorBtn').innerText = t.pickColorBtn;
+
+      document.getElementById('lblSensitivity').innerText = t.lblSensitivity;
+
+      document.getElementById('removeBgColorBtn').innerText = t.removeBgColorBtn;
+
+
+
+      var textInput = document.getElementById('textInput');
+
+      textInput.placeholder = t.textPlaceholder;
+
+      if (textInput.value === translations['zh'].defaultTextVal || textInput.value === translations['en'].defaultTextVal) {
+
+        textInput.value = t.defaultTextVal;
+
+      }
+
+
+
+      document.getElementById('lblTextColor').innerText = t.lblTextColor;
+
+      document.getElementById('lblFontSize').innerText = t.lblFontSize;
+
+      document.getElementById('addTextBtn').innerText = t.addTextBtn;
+
+
+
+      var toggleBtn = document.getElementById('toggleBrushBtn');
+
+      if (globalCanvas && globalCanvas.isDrawingMode) {
+
+        toggleBtn.innerText = t.brushOff;
+
+      } else {
+
+        toggleBtn.innerText = t.brushOn;
+
+      }
+
+
+
+      document.getElementById('eraserBtn').innerText = t.eraserBtn;
+
+      document.getElementById('lblBrushColor').innerText = t.lblBrushColor;
+
+      document.getElementById('lblBrushSize').innerText = t.lblBrushSize;
+
+
+
+      document.getElementById('bringToFrontBtn').innerText = t.bringToFrontBtn;
+
+      document.getElementById('sendToBackBtn').innerText = t.sendToBackBtn;
+
+      document.getElementById('deleteBtn').innerText = t.deleteBtn;
+
+      document.getElementById('downloadBtn').innerText = t.downloadBtn;
+
+
+
+      // 更新字型下拉選單顯示名稱
+
+      var fontSelect = document.getElementById('fontFamilySelect');
+
+      fontSelect.options[0].text = t.fontMicrosoft;
+
+      fontSelect.options[1].text = t.fontSans;
+
+      fontSelect.options[2].text = t.fontKai;
+
+      fontSelect.options[3].text = t.fontMing;
+
+
+
+      // 更新狀態列文字
+
+      var statusEl = document.getElementById('status');
+
+      if (statusEl.innerText.indexOf('點擊上方') !== -1 || statusEl.innerText.indexOf('Click above') !== -1) {
+
+        statusEl.innerText = t.statusSelectImg;
+
+      }
+
     }
 
-    // 簡單去背工具專屬邏輯 (閉包保護)
-    (function() {
-      const fileInput = document.getElementById('bg-fileInput');
-      const status = document.getElementById('bg-status');
-      const canvas = document.getElementById('bg-canvas');
-      const ctx = canvas ? canvas.getContext('2d', { willReadFrequently: true }) : null;
-      const processBtn = document.getElementById('bg-processBtn');
-      const downloadBtn = document.getElementById('bg-downloadBtn');
-      const restoreBtn = document.getElementById('bg-restoreBtn');
-      const strength = document.getElementById('bg-strength');
-      const strengthVal = document.getElementById('bg-strengthVal');
-      const colorPicker = document.getElementById('bg-colorPicker');
-      const sampleBtn = document.getElementById('bg-sampleBtn');
-      const tabAuto = document.getElementById('bg-tabAuto');
-      const tabManual = document.getElementById('bg-tabManual');
-      const manualPanel = document.getElementById('bg-manualPanel');
-      const previewLabel = document.getElementById('bg-previewLabel');
-      const hint = document.getElementById('bg-hint');
 
-      if (!canvas || !fileInput) return;
 
-      let originalImageData = null;
-      let mode = 'auto';
-      let sampling = false;
-      let hasResult = false;
+    function disableDrawingMode() {
 
-      strength.oninput = () => strengthVal.textContent = strength.value;
+      if (globalCanvas) {
 
-      tabAuto.onclick = () => {
-        mode = 'auto';
-        tabAuto.classList.add('active');
-        tabManual.classList.remove('active');
-        manualPanel.style.display = 'none';
-        previewLabel.textContent = '預覽';
-        sampling = false;
-      };
+        globalCanvas.isDrawingMode = false;
 
-      tabManual.onclick = () => {
-        mode = 'manual';
-        tabManual.classList.add('active');
-        tabAuto.classList.remove('active');
-        manualPanel.style.display = 'block';
-        previewLabel.textContent = '原圖（可點擊取色）';
-      };
+        var toggleBtn = document.getElementById('toggleBrushBtn');
 
-      sampleBtn.onclick = () => {
-        if (!originalImageData) {
-          status.textContent = '請先選擇圖片';
-          return;
+        if (toggleBtn) {
+
+          toggleBtn.innerText = translations[currentLang].brushOn;
+
+          toggleBtn.classList.remove('active');
+
         }
-        ctx.putImageData(originalImageData, 0, 0);
-        hasResult = false;
-        downloadBtn.disabled = true;
-        sampling = true;
-        status.textContent = '請在圖片上點一下要消除的顏色';
-        hint.textContent = '點擊圖片上的背景顏色';
-      };
 
-      canvas.addEventListener('click', function(e) {
-        if (!sampling || !originalImageData) return;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const x = Math.floor((e.clientX - rect.left) * scaleX);
-        const y = Math.floor((e.clientY - rect.top) * scaleY);
-        const data = ctx.getImageData(x, y, 1, 1).data;
-        const hex = '#' + [data[0], data[1], data[2]].map(v => v.toString(16).padStart(2, '0')).join('');
-        colorPicker.value = hex;
-        sampling = false;
-        status.textContent = '已選取顏色，可以按「開始清除背景」';
-        hint.textContent = '顏色已選好，調整強度後按開始清除背景';
+      }
+
+    }
+
+
+
+    function switchTab(tabId, btnElement) {
+
+      var contents = document.querySelectorAll('.tab-content');
+
+      for (var i = 0; i < contents.length; i++) {
+
+        contents[i].classList.remove('active');
+
+      }
+
+      var buttons = document.querySelectorAll('.tab-btn');
+
+      for (var j = 0; j < buttons.length; j++) {
+
+        buttons[j].classList.remove('active');
+
+      }
+
+
+
+      document.getElementById(tabId).classList.add('active');
+
+      btnElement.classList.add('active');
+
+
+
+      if (tabId !== 'brushTab') {
+
+        disableDrawingMode();
+
+      }
+
+    }
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+      var langSelect = document.getElementById('langSelect');
+
+      langSelect.addEventListener('change', function(e) {
+
+        updateLanguage(e.target.value);
+
       });
 
-      fileInput.onchange = function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.onload = function() {
-          const maxW = Math.min(800, window.innerWidth - 40);
-          let w = img.width;
-          let h = img.height;
-          if (w > maxW) {
-            h = Math.round(h * maxW / w);
-            w = maxW;
-          }
-          canvas.width = w;
-          canvas.height = h;
-          ctx.drawImage(img, 0, 0, w, h);
-          originalImageData = ctx.getImageData(0, 0, w, h);
-          processBtn.disabled = false;
-          restoreBtn.disabled = false;
-          downloadBtn.disabled = true;
-          hasResult = false;
-          status.textContent = '圖片已載入，可以開始清除背景了';
-          hint.textContent = '按「開始清除背景」。不滿意就按「還原原圖」再試。';
-          URL.revokeObjectURL(url);
-        };
-        img.src = url;
-      };
 
-      function hexToRgb(hex) {
-        return [
-          parseInt(hex.slice(1, 3), 16),
-          parseInt(hex.slice(3, 5), 16),
-          parseInt(hex.slice(5, 7), 16)
-        ];
+
+      var canvas = new fabric.Canvas('c', {
+
+        backgroundColor: '#ece6e4',
+
+        preserveObjectStacking: true
+
+      });
+
+      globalCanvas = canvas;
+
+
+
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+
+      canvas.freeDrawingBrush.color = '#ef4444';
+
+      canvas.freeDrawingBrush.width = 8;
+
+
+
+      var canvasWidthInput = document.getElementById('canvasWidthInput');
+
+      var canvasHeightInput = document.getElementById('canvasHeightInput');
+
+      var applyCanvasSizeBtn = document.getElementById('applyCanvasSizeBtn');
+
+
+
+      canvas.setWidth(380);
+
+      canvas.setHeight(380);
+
+      canvasWidthInput.value = 380;
+
+      canvasHeightInput.value = 380;
+
+      canvas.renderAll();
+
+
+
+      function updateCanvasSize(e) {
+
+        if (e) e.preventDefault();
+
+       
+
+        var w = parseInt(String(canvasWidthInput.value).trim(), 10);
+
+        var h = parseInt(String(canvasHeightInput.value).trim(), 10);
+
+
+
+        if (isNaN(w) || w <= 0) w = 380;
+
+        if (isNaN(h) || h <= 0) h = 380;
+
+
+
+        canvasWidthInput.value = w;
+
+        canvasHeightInput.value = h;
+
+
+
+        canvas.setWidth(w);
+
+        canvas.setHeight(h);
+
+        canvas.calcOffset();
+
+        canvas.renderAll();
+
+
+
+        canvasWidthInput.blur();
+
+        canvasHeightInput.blur();
+
       }
 
-      function sampleCorners() {
-        const w = canvas.width, h = canvas.height;
-        const pts = [[2,2],[w-3,2],[2,h-3],[w-3,h-3],[w/2,2],[w/2,h-3]];
-        let r = 0, g = 0, b = 0;
-        pts.forEach(([x, y]) => {
-          const d = ctx.getImageData(x, y, 1, 1).data;
-          r += d[0]; g += d[1]; b += d[2];
+
+
+      applyCanvasSizeBtn.addEventListener('click', updateCanvasSize);
+
+
+
+      var statusEl = document.getElementById('status');
+
+      var imageInput = document.getElementById('imageInput');
+
+      var removeBgColorBtn = document.getElementById('removeBgColorBtn');
+
+      var bgControls = document.getElementById('bgControls');
+
+      var distanceRange = document.getElementById('distanceRange');
+
+      var rangeVal = document.getElementById('rangeVal');
+
+     
+
+      var targetColorPicker = document.getElementById('targetColorPicker');
+
+      var pickColorBtn = document.getElementById('pickColorBtn');
+
+
+
+      var deleteBtn = document.getElementById('deleteBtn');
+
+      var bringToFrontBtn = document.getElementById('bringToFrontBtn');
+
+      var sendToBackBtn = document.getElementById('sendToBackBtn');
+
+     
+
+      var textColorPicker = document.getElementById('textColorPicker');
+
+      var fontSizeInput = document.getElementById('fontSizeInput');
+
+      var fontFamilySelect = document.getElementById('fontFamilySelect');
+
+
+
+      var toggleBrushBtn = document.getElementById('toggleBrushBtn');
+
+      var eraserBtn = document.getElementById('eraserBtn');
+
+      var brushColorPicker = document.getElementById('brushColorPicker');
+
+      var brushSizeRange = document.getElementById('brushSizeRange');
+
+      var brushSizeVal = document.getElementById('brushSizeVal');
+
+
+
+      toggleBrushBtn.addEventListener('click', function() {
+
+        var t = translations[currentLang];
+
+        canvas.isDrawingMode = !canvas.isDrawingMode;
+
+        if (canvas.isDrawingMode) {
+
+          toggleBrushBtn.innerText = t.brushOff;
+
+          toggleBrushBtn.classList.add('active');
+
+          canvas.freeDrawingBrush.color = brushColorPicker.value;
+
+        } else {
+
+          toggleBrushBtn.innerText = t.brushOn;
+
+          toggleBrushBtn.classList.remove('active');
+
+        }
+
+      });
+
+
+
+      eraserBtn.addEventListener('click', function() {
+
+        var t = translations[currentLang];
+
+        if (!canvas.isDrawingMode) {
+
+          canvas.isDrawingMode = true;
+
+          toggleBrushBtn.innerText = t.brushOff;
+
+          toggleBrushBtn.classList.add('active');
+
+        }
+
+        var bgColor = canvas.backgroundColor || '#ece6e4';
+
+        canvas.freeDrawingBrush.color = bgColor;
+
+      });
+
+
+
+      brushColorPicker.addEventListener('input', function(e) {
+
+        canvas.freeDrawingBrush.color = e.target.value;
+
+      });
+
+
+
+      brushSizeRange.addEventListener('input', function(e) {
+
+        var size = parseInt(e.target.value, 10);
+
+        brushSizeVal.innerText = size;
+
+        canvas.freeDrawingBrush.width = size;
+
+      });
+
+
+
+      distanceRange.addEventListener('input', function(e) {
+
+        rangeVal.innerText = e.target.value;
+
+      });
+
+
+
+      pickColorBtn.addEventListener('click', function() {
+
+        var t = translations[currentLang];
+
+        if ('EyeDropper' in window) {
+
+          const eyeDropper = new EyeDropper();
+
+          eyeDropper.open().then(result => {
+
+            targetColorPicker.value = result.sRGBHex;
+
+            statusEl.innerText = t.statusColorPicked.replace('{color}', result.sRGBHex);
+
+          }).catch(e => {});
+
+        } else {
+
+          statusEl.innerText = t.statusColorPickNoSupport;
+
+          targetColorPicker.click();
+
+        }
+
+      });
+
+
+
+      imageInput.addEventListener('change', function(e) {
+
+        if (e.target.files.length > 0) {
+
+          var file = e.target.files[0];
+
+          var url = URL.createObjectURL(file);
+
+
+
+          fabric.Image.fromURL(url, function(img) {
+
+            img.scaleToWidth(canvas.width * 0.7);
+
+            canvas.add(img);
+
+            canvas.centerObject(img);
+
+            canvas.setActiveObject(img);
+
+            statusEl.innerText = translations[currentLang].statusUploaded;
+
+            bgControls.style.display = "flex";
+
+          });
+
+        }
+
+      });
+
+
+
+      removeBgColorBtn.addEventListener('click', function() {
+
+        var t = translations[currentLang];
+
+        var activeObj = canvas.getActiveObject();
+
+        if (activeObj && activeObj.type === 'image') {
+
+          activeObj.filters = [];
+
+          var threshold = parseFloat(distanceRange.value);
+
+          var selectedColor = targetColorPicker.value;
+
+
+
+          var filter = new fabric.Image.filters.RemoveColor({
+
+            color: selectedColor,
+
+            distance: threshold
+
+          });
+
+         
+
+          activeObj.filters.push(filter);
+
+          activeObj.applyFilters();
+
+          canvas.renderAll();
+
+          statusEl.innerText = t.statusBgRemoved.replace('{color}', selectedColor);
+
+        } else {
+
+          alert(t.alertSelectImg);
+
+        }
+
+      });
+
+
+
+      document.getElementById('addTextBtn').addEventListener('click', function() {
+
+        var t = translations[currentLang];
+
+        var val = document.getElementById('textInput').value || t.defaultTextVal;
+
+        var text = new fabric.Text(val, {
+
+          left: canvas.width / 4,
+
+          top: canvas.height / 4,
+
+          fontSize: parseInt(fontSizeInput.value, 10) || 32,
+
+          fill: textColorPicker.value,
+
+          fontFamily: fontFamilySelect.value,
+
+          fontWeight: 'bold'
+
         });
-        return [Math.round(r/pts.length), Math.round(g/pts.length), Math.round(b/pts.length)];
+
+        canvas.add(text);
+
+        canvas.setActiveObject(text);
+
+      });
+
+
+
+      canvas.on('selection:created', updateControlPanel);
+
+      canvas.on('selection:updated', updateControlPanel);
+
+
+
+      function updateControlPanel() {
+
+        var activeObj = canvas.getActiveObject();
+
+        if (activeObj && activeObj.type === 'text') {
+
+          textColorPicker.value = activeObj.fill;
+
+          fontSizeInput.value = activeObj.fontSize;
+
+          fontFamilySelect.value = activeObj.fontFamily;
+
+        }
+
       }
 
-      restoreBtn.onclick = function() {
-        if (!originalImageData) return;
-        ctx.putImageData(originalImageData, 0, 0);
-        hasResult = false;
-        downloadBtn.disabled = true;
-        sampling = false;
-        status.textContent = '已還原成原圖，可以重新調整後再清除';
-        hint.textContent = '可改強度或換模式，再按「開始清除背景」';
-      };
 
-      processBtn.onclick = function() {
-        if (!originalImageData) return;
-        status.textContent = '處理中，請稍候…';
-        processBtn.disabled = true;
 
-        setTimeout(function() {
-          const tol = parseInt(strength.value, 10);
-          const soft = Math.round(tol * 0.35);
-          let tr, tg, tb;
+      textColorPicker.addEventListener('input', function(e) {
 
-          ctx.putImageData(originalImageData, 0, 0);
+        var activeObj = canvas.getActiveObject();
 
-          if (mode === 'auto') {
-            [tr, tg, tb] = sampleCorners();
-          } else {
-            [tr, tg, tb] = hexToRgb(colorPicker.value);
-          }
+        if (activeObj && activeObj.type === 'text') {
 
-          const src = originalImageData.data;
-          const out = ctx.createImageData(canvas.width, canvas.height);
-          const d = out.data;
+          activeObj.set('fill', e.target.value);
 
-          for (let i = 0; i < src.length; i += 4) {
-            const r = src[i], g = src[i+1], b = src[i+2];
-            const dist = Math.sqrt((r-tr)*(r-tr) + (g-tg)*(g-tg) + (b-tb)*(b-tb));
-            let alpha = 255;
-            if (dist <= tol) {
-              alpha = 0;
-            } else if (dist < tol + soft) {
-              alpha = Math.round(255 * (dist - tol) / soft);
-            }
-            d[i] = r; d[i+1] = g; d[i+2] = b; d[i+3] = alpha;
-          }
+          canvas.renderAll();
 
-          ctx.putImageData(out, 0, 0);
-          hasResult = true;
-          downloadBtn.disabled = false;
-          processBtn.disabled = false;
-          status.textContent = '清除完成！不滿意可按「還原原圖」重來';
-          hint.textContent = '可調整強度後再按「開始清除背景」，或按還原。';
-        }, 50);
-      };
+        }
 
-      downloadBtn.onclick = function() {
-        if (!hasResult) return;
-        const a = document.createElement('a');
-        a.download = '去背結果.png';
-        a.href = canvas.toDataURL('image/png');
-        a.click();
-      };
-    })();
+      });
+
+
+
+      fontSizeInput.addEventListener('input', function(e) {
+
+        var activeObj = canvas.getActiveObject();
+
+        if (activeObj && activeObj.type === 'text') {
+
+          activeObj.set('fontSize', parseInt(e.target.value, 10) || 20);
+
+          canvas.renderAll();
+
+        }
+
+      });
+
+
+
+      fontFamilySelect.addEventListener('change', function(e) {
+
+        var activeObj = canvas.getActiveObject();
+
+        if (activeObj && activeObj.type === 'text') {
+
+          activeObj.set('fontFamily', e.target.value);
+
+          canvas.renderAll();
+
+        }
+
+      });
+
+
+
+      bringToFrontBtn.addEventListener('click', function() {
+
+        var activeObj = canvas.getActiveObject();
+
+        if (activeObj) {
+
+          canvas.bringToFront(activeObj);
+
+          canvas.discardActiveObject();
+
+          canvas.setActiveObject(activeObj);
+
+          canvas.requestRenderAll();
+
+        } else {
+
+          alert(translations[currentLang].alertSelectObj);
+
+        }
+
+      });
+
+
+
+      sendToBackBtn.addEventListener('click', function() {
+
+        var activeObj = canvas.getActiveObject();
+
+        if (activeObj) {
+
+          canvas.sendToBack(activeObj);
+
+          canvas.discardActiveObject();
+
+          canvas.setActiveObject(activeObj);
+
+          canvas.requestRenderAll();
+
+        } else {
+
+          alert(translations[currentLang].alertSelectObj);
+
+        }
+
+      });
+
+
+
+      deleteBtn.addEventListener('click', function() {
+
+        var activeObjects = canvas.getActiveObjects();
+
+        if (activeObjects && activeObjects.length > 0) {
+
+          activeObjects.forEach(function(obj) { canvas.remove(obj); });
+
+          canvas.discardActiveObject();
+
+          canvas.requestRenderAll();
+
+        } else {
+
+          alert(translations[currentLang].alertSelectObjDelete);
+
+        }
+
+      });
+
+
+
+      document.getElementById('bgColorPicker').addEventListener('input', function(e) {
+
+        canvas.setBackgroundColor(e.target.value, function() {
+
+          canvas.renderAll();
+
+        });
+
+      });
+
+
+
+      document.getElementById('downloadBtn').addEventListener('click', function() {
+
+        var dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
+
+        var link = document.createElement('a');
+
+        link.download = translations[currentLang].downloadFileName;
+
+        link.href = dataURL;
+
+        link.click();
+
+      });
+
+
+
+      // 初始化語言設定
+
+      updateLanguage('zh');
+
+    });
+
   </script>
+
 </body>
-</html>
+
+</html> 
+
