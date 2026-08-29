@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>簡單海報製作 (v1.0.8 固定列版)</title>
+  <title>簡單海報製作 (v1.0.9 圖層控制版)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
@@ -21,7 +21,7 @@
 
     .app-header {
       background: rgba(255, 255, 255, 0.5);
-      padding: 10px 16px;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -29,27 +29,35 @@
     }
 
     .app-header h1 {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
       color: #3a2e18;
     }
 
     .version-tag {
-      font-size: 12px;
+      font-size: 11px;
       color: #6c5d47;
       background: rgba(255, 255, 255, 0.85);
-      padding: 3px 6px;
+      padding: 2px 6px;
       border-radius: 10px;
       font-weight: bold;
     }
 
-    /* 全局常駐操作按鈕區 */
+    /* 全局常駐操作按鈕區 (頂部 4 按鈕) */
     .global-actions {
-      display: flex;
-      gap: 10px;
-      padding: 10px 16px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 8px 10px;
       background: rgba(255, 255, 255, 0.85);
       border-bottom: 1px solid rgba(60, 45, 20, 0.2);
+    }
+
+    .global-actions button {
+      height: 38px;
+      padding: 2px;
+      font-size: 13px;
+      border-radius: 6px;
     }
 
     .tab-bar {
@@ -60,10 +68,10 @@
 
     .tab-btn {
       flex: 1;
-      padding: 12px 4px;
+      padding: 10px 4px;
       background: transparent;
       border: none;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: bold;
       color: #4a3b22;
       cursor: pointer;
@@ -73,12 +81,12 @@
     .tab-btn.active {
       background: rgba(255, 255, 255, 0.75);
       color: #000000;
-      border-bottom: 4px solid #d97706;
+      border-bottom: 3px solid #d97706;
     }
 
     .control-panel {
       background: rgba(255, 255, 255, 0.65);
-      padding: 14px 16px;
+      padding: 10px 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.5);
     }
 
@@ -89,46 +97,56 @@
     .tab-content.active {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
+    /* 單列精簡表單樣式 */
     .form-row {
       display: flex;
-      gap: 10px;
+      gap: 6px;
       align-items: center;
+      width: 100%;
     }
 
     .form-row label {
-      font-size: 15px;
+      font-size: 13px;
       color: #2c2416;
       white-space: nowrap;
-      min-width: 80px;
       font-weight: bold;
+    }
+
+    .compact-field {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
     }
 
     button, input[type="file"], input[type="color"], input[type="text"], input[type="number"], select {
       width: 100%;
-      height: 44px;
-      padding: 6px 10px;
+      height: 38px;
+      padding: 4px 6px;
       border: 1px solid rgba(60, 45, 20, 0.35);
-      border-radius: 8px;
-      font-size: 15px;
+      border-radius: 6px;
+      font-size: 14px;
       background: #ffffff;
       color: #2c2416;
     }
 
     input[type="range"] {
       width: 100%;
-      height: 28px;
+      height: 24px;
     }
 
-    input[type="file"] { padding: 8px; height: auto; }
-    input[type="color"] { padding: 3px; cursor: pointer; }
+    input[type="file"] { padding: 6px; height: auto; }
+    input[type="color"] { padding: 2px; cursor: pointer; min-width: 32px; }
 
-    .btn-action { background: #4a3b22; color: #ffffff; font-weight: bold; font-size: 16px; }
-    .btn-magic { background: #d97706; color: #ffffff; font-weight: bold; font-size: 16px; }
-    .btn-delete { background: #a83232; color: #ffffff; font-weight: bold; font-size: 16px; }
-    .btn-download { background: #2d7a42; color: #ffffff; font-weight: bold; font-size: 16px; }
+    .btn-action { background: #4a3b22; color: #ffffff; font-weight: bold; }
+    .btn-magic { background: #d97706; color: #ffffff; font-weight: bold; }
+    .btn-delete { background: #a83232; color: #ffffff; font-weight: bold; }
+    .btn-download { background: #2d7a42; color: #ffffff; font-weight: bold; }
+    .btn-layer { background: #3b6282; color: #ffffff; font-weight: bold; }
 
     .main-content {
       flex: 1;
@@ -136,7 +154,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px 10px;
+      padding: 10px 8px;
     }
 
     .canvas-container-wrapper {
@@ -147,11 +165,11 @@
     }
 
     #status {
-      font-size: 13px;
+      font-size: 12px;
       color: #3a2e18;
       font-weight: bold;
       background: rgba(255,255,255,0.8);
-      padding: 6px 10px;
+      padding: 4px 8px;
       border-radius: 6px;
       text-align: center;
     }
@@ -159,9 +177,9 @@
     .bg-controls {
       display: none;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       background: rgba(255, 255, 255, 0.5);
-      padding: 10px;
+      padding: 8px;
       border-radius: 8px;
       border: 1px dashed rgba(60, 45, 20, 0.3);
     }
@@ -171,11 +189,13 @@
 
   <div class="app-header">
     <h1>簡單海報製作</h1>
-    <span class="version-tag">v1.0.8 置頂按鈕版</span>
+    <span class="version-tag">v1.0.9 單列圖層版</span>
   </div>
 
-  <!-- 置頂常駐功能列 -->
+  <!-- 置頂常駐功能列 (刪除、最前、最後、下載) -->
   <div class="global-actions">
+    <button id="bringToFrontBtn" class="btn-layer">🔝 移至最前</button>
+    <button id="sendToBackBtn" class="btn-layer">⬇️ 移至最後</button>
     <button id="deleteBtn" class="btn-delete">🗑️ 刪除選取</button>
     <button id="downloadBtn" class="btn-download">💾 下載圖</button>
   </div>
@@ -188,19 +208,23 @@
 
   <div class="control-panel">
     
-    <!-- 分頁 1: 設定底圖大小與底色 -->
+    <!-- 分頁 1: 設定底圖大小與底色 (整合為單列) -->
     <div id="canvasTab" class="tab-content active">
       <div class="form-row">
-        <label>畫布底色：</label>
-        <input type="color" id="bgColorPicker" value="#ffffff">
+        <div class="compact-field" style="flex: 0 0 75px;">
+          <label>底色:</label>
+          <input type="color" id="bgColorPicker" value="#ffffff">
+        </div>
+        <div class="compact-field">
+          <label>寬:</label>
+          <input type="number" id="canvasWidthInput" value="350" min="100" max="2000" step="10">
+        </div>
+        <div class="compact-field">
+          <label>高:</label>
+          <input type="number" id="canvasHeightInput" value="350" min="100" max="2000" step="10">
+        </div>
+        <button id="applyCanvasSizeBtn" class="btn-action" style="flex: 0 0 60px;">套用</button>
       </div>
-      <div class="form-row">
-        <label>寬度(px)：</label>
-        <input type="number" id="canvasWidthInput" value="350" min="100" max="2000" step="10">
-        <label style="min-width:60px; margin-left:6px;">高度：</label>
-        <input type="number" id="canvasHeightInput" value="350" min="100" max="2000" step="10">
-      </div>
-      <button id="applyCanvasSizeBtn" class="btn-action">套用畫布尺寸</button>
     </div>
 
     <!-- 分頁 2: 上傳圖片與去背 -->
@@ -211,7 +235,7 @@
         <div class="form-row">
           <label>去背靈敏度：</label>
           <input type="range" id="distanceRange" min="0.05" max="0.5" step="0.01" value="0.15">
-          <span id="rangeVal" style="font-weight: bold; min-width: 40px;">0.15</span>
+          <span id="rangeVal" style="font-weight: bold; min-width: 35px; font-size: 13px;">0.15</span>
         </div>
         <button id="removeBgColorBtn" class="btn-magic">🪄 執行消除白底</button>
       </div>
@@ -219,26 +243,28 @@
       <div id="status">點擊上方按鈕選擇圖片...</div>
     </div>
 
-    <!-- 分頁 3: 文字部分 -->
+    <!-- 分頁 3: 文字部分 (顏色、大小、字體 整合為單列) -->
     <div id="textTab" class="tab-content">
       <input type="text" id="textInput" placeholder="請輸入文字..." value="特惠商品 5 折起">
       
       <div class="form-row">
-        <label>顏色：</label>
-        <input type="color" id="textColorPicker" value="#2c2416">
-        <label style="min-width:50px; margin-left:8px;">大小：</label>
-        <input type="number" id="fontSizeInput" value="32" min="12" max="120">
-      </div>
-
-      <div class="form-row">
-        <label>字體：</label>
-        <select id="fontFamilySelect">
-          <option value="Microsoft JhengHei">微軟正黑體</option>
-          <option value="sans-serif">預設無襯線體</option>
-          <option value="DFKai-SB">標楷體</option>
-          <option value="PMingLiU">新細明體</option>
-          <option value="Impact">粗體英文 (Impact)</option>
-        </select>
+        <div class="compact-field" style="flex: 0 0 75px;">
+          <label>顏色:</label>
+          <input type="color" id="textColorPicker" value="#2c2416">
+        </div>
+        <div class="compact-field" style="flex: 0 0 85px;">
+          <label>大小:</label>
+          <input type="number" id="fontSizeInput" value="32" min="12" max="120">
+        </div>
+        <div class="compact-field">
+          <select id="fontFamilySelect">
+            <option value="Microsoft JhengHei">微軟正黑體</option>
+            <option value="sans-serif">預設無襯線體</option>
+            <option value="DFKai-SB">標楷體</option>
+            <option value="PMingLiU">新細明體</option>
+            <option value="Impact">Impact</option>
+          </select>
+        </div>
       </div>
 
       <button id="addTextBtn" class="btn-action">＋ 新增文字</button>
@@ -277,8 +303,8 @@
       var applyCanvasSizeBtn = document.getElementById('applyCanvasSizeBtn');
 
       function resizeCanvasForMobile() {
-        var availableWidth = window.innerWidth - 24;
-        var availableHeight = window.innerHeight - 380;
+        var availableWidth = window.innerWidth - 20;
+        var availableHeight = window.innerHeight - 340;
         var defaultSize = Math.max(Math.min(availableWidth, availableHeight, 500), 280);
         
         canvas.setWidth(defaultSize);
@@ -290,7 +316,6 @@
       window.addEventListener('resize', resizeCanvasForMobile);
       resizeCanvasForMobile();
 
-      // 套用自訂畫布尺寸
       applyCanvasSizeBtn.addEventListener('click', function() {
         var w = parseInt(canvasWidthInput.value, 10) || 350;
         var h = parseInt(canvasHeightInput.value, 10) || 350;
@@ -307,6 +332,9 @@
       var rangeVal = document.getElementById('rangeVal');
       
       var deleteBtn = document.getElementById('deleteBtn');
+      var bringToFrontBtn = document.getElementById('bringToFrontBtn');
+      var sendToBackBtn = document.getElementById('sendToBackBtn');
+      
       var textColorPicker = document.getElementById('textColorPicker');
       var fontSizeInput = document.getElementById('fontSizeInput');
       var fontFamilySelect = document.getElementById('fontFamilySelect');
@@ -400,7 +428,29 @@
         }
       });
 
-      // 置頂刪除鍵邏輯
+      // 圖層控制：移至最前
+      bringToFrontBtn.addEventListener('click', function() {
+        var activeObj = canvas.getActiveObject();
+        if (activeObj) {
+          canvas.bringToFront(activeObj);
+          canvas.renderAll();
+        } else {
+          alert("請先點選畫布上的物件！");
+        }
+      });
+
+      // 圖層控制：移至最後
+      sendToBackBtn.addEventListener('click', function() {
+        var activeObj = canvas.getActiveObject();
+        if (activeObj) {
+          canvas.sendToBack(activeObj);
+          canvas.renderAll();
+        } else {
+          alert("請先點選畫布上的物件！");
+        }
+      });
+
+      // 刪除選取
       deleteBtn.addEventListener('click', function() {
         var activeObjects = canvas.getActiveObjects();
         if (activeObjects && activeObjects.length > 0) {
@@ -408,7 +458,7 @@
           canvas.discardActiveObject();
           canvas.requestRenderAll();
         } else {
-          alert("請先點選畫布上要刪除的圖片或文字！");
+          alert("請先點選畫布上要刪除的物件！");
         }
       });
 
@@ -418,7 +468,7 @@
         });
       });
 
-      // 置頂下載鍵邏輯
+      // 下載圖
       document.getElementById('downloadBtn').addEventListener('click', function() {
         var dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
         var link = document.createElement('a');
