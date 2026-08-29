@@ -4,15 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>純前端 AI 去背與圖文合成工具</title>
-  <!-- 載入 Fabric.js 畫布庫 -->
+  
+  <!-- 1. 載入 Fabric.js (畫布套件) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-  <!-- 載入 @imgly/background-removal 引擎 -->
-  <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/index.mjs" type="module"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* 整體背景採用 #c0ab79 主色調 */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #c0ab79;
@@ -21,7 +19,6 @@
       min-height: 100vh;
     }
     
-    /* 大螢幕/電腦版：左右雙欄 */
     .app-container {
       display: flex;
       width: 100%;
@@ -29,7 +26,6 @@
       overflow: hidden;
     }
 
-    /* 側邊控制面板 (電腦版在左，手機版在頂部) */
     .sidebar {
       width: 340px;
       background: rgba(255, 255, 255, 0.45);
@@ -40,7 +36,6 @@
       flex-direction: column;
       gap: 18px;
       overflow-y: auto;
-      box-shadow: 2px 0 15px rgba(0,0,0,0.05);
     }
 
     h2 {
@@ -91,7 +86,6 @@
     .btn-delete { background: #a83232; }
     .btn-delete:hover { background: #872424; }
 
-    /* 中央/右側畫布區域 */
     .main-content {
       flex: 1;
       display: flex;
@@ -119,16 +113,12 @@
       font-weight: 500;
     }
 
-    /* ---------------------------------------------------- */
-    /* 手機/行動裝置響應式設計 (RWD 直式排版) */
-    /* ---------------------------------------------------- */
     @media (max-width: 768px) {
       .app-container {
-        flex-direction: column; /* 改為直式單欄上下排列 */
+        flex-direction: column;
         height: auto;
         overflow-y: auto;
       }
-
       .sidebar {
         width: 100%;
         height: auto;
@@ -136,16 +126,13 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.4);
         padding: 15px;
       }
-
       .main-content {
         width: 100%;
         padding: 15px;
       }
-
-      /* 讓 Canvas 在手機小螢幕下能夠按比例自適應縮放 */
       .canvas-container-wrapper {
         max-width: 100%;
-        touch-action: none; /* 優化手機觸控操作 */
+        touch-action: none;
       }
     }
   </style>
@@ -153,13 +140,12 @@
 <body>
 
   <div class="app-container">
-    <!-- 控制側邊欄 (手機版會在上方) -->
     <div class="sidebar">
       <h2>AI 圖文工作室</h2>
 
       <!-- 1. 去背區塊 -->
       <div class="panel-group">
-        <h3>1. 匯入與 AI 去背</h3>
+        <h3>1. 匯入圖片</h3>
         <input type="file" id="imageInput" accept="image/*">
         <button id="removeBgBtn" disabled>執行 AI 去背並加入畫布</button>
         <button id="addDirectBtn" style="background:#6c5d47;" disabled>不去背直接加入</button>
@@ -183,7 +169,6 @@
       </div>
     </div>
 
-    <!-- 主畫布區域 (手機版會在下方) -->
     <div class="main-content">
       <div class="canvas-container-wrapper">
         <canvas id="c" width="500" height="500"></canvas>
@@ -191,131 +176,137 @@
     </div>
   </div>
 
+  <!-- 2. 載入 @imgly/background-removal 模組 -->
   <script type="module">
     import removeBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/index.mjs';
 
-    // 初始化 Fabric.js 畫布
-    const canvas = new fabric.Canvas('c', {
-      backgroundColor: '#ffffff'
-    });
+    // 確保 DOM 載入後才執行 Javascript 邏輯
+    window.addEventListener('DOMContentLoaded', () => {
+      // 初始化 Fabric 畫布
+      const canvas = new fabric.Canvas('c', {
+        backgroundColor: '#ffffff'
+      });
 
-    // 適應手機寬度調整 Canvas 顯示大小
-    function resizeCanvasForMobile() {
-      const screenWidth = window.innerWidth;
-      if (screenWidth < 540) {
-        const newSize = screenWidth - 40; // 扣除 padding
-        canvas.setWidth(newSize);
-        canvas.setHeight(newSize);
-        canvas.renderAll();
+      // 手機寬度自適應
+      function resizeCanvasForMobile() {
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 540) {
+          const newSize = screenWidth - 40;
+          canvas.setWidth(newSize);
+          canvas.setHeight(newSize);
+          canvas.renderAll();
+        }
       }
-    }
-    window.addEventListener('resize', resizeCanvasForMobile);
-    resizeCanvasForMobile();
+      window.addEventListener('resize', resizeCanvasForMobile);
+      resizeCanvasForMobile();
 
-    const statusEl = document.getElementById('status');
-    const imageInput = document.getElementById('imageInput');
-    const removeBgBtn = document.getElementById('removeBgBtn');
-    const addDirectBtn = document.getElementById('addDirectBtn');
-    const deleteBtn = document.getElementById('deleteBtn');
-    let currentFile = null;
+      const statusEl = document.getElementById('status');
+      const imageInput = document.getElementById('imageInput');
+      const removeBgBtn = document.getElementById('removeBgBtn');
+      const addDirectBtn = document.getElementById('addDirectBtn');
+      const deleteBtn = document.getElementById('deleteBtn');
+      let currentFile = null;
 
-    // 選擇檔案監聽
-    imageInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        currentFile = e.target.files[0];
-        removeBgBtn.disabled = false;
-        addDirectBtn.disabled = false;
-        statusEl.innerText = "圖片已選擇，點擊「執行 AI 去背」開始處理。";
-      }
-    });
+      // 1. 選擇檔案
+      imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          currentFile = e.target.files[0];
+          removeBgBtn.disabled = false;
+          addDirectBtn.disabled = false;
+          statusEl.innerText = "圖片已選擇，點擊「執行 AI 去背」或「直接加入」。";
+        }
+      });
 
-    // AI 去背核心邏輯
-    removeBgBtn.addEventListener('click', async () => {
-      if (!currentFile) return;
+      // 2. AI 去背邏輯
+      removeBgBtn.addEventListener('click', async () => {
+        if (!currentFile) return;
 
-      removeBgBtn.disabled = true;
-      statusEl.innerText = "AI 去背計算中（第一次需要下載資源，請稍候）...";
+        removeBgBtn.disabled = true;
+        statusEl.innerText = "AI 去背計算中（第一次需要下載資源，請稍候）...";
 
-      try {
-        const blob = await removeBackground(currentFile, {
-          progress: (key, current, total) => {
-            const pct = Math.round((current / total) * 100) || 0;
-            statusEl.innerText = `下載/處理中... ${pct}%`;
-          }
-        });
+        try {
+          const blob = await removeBackground(currentFile, {
+            progress: (key, current, total) => {
+              const pct = Math.round((current / total) * 100) || 0;
+              statusEl.innerText = `下載 AI 模組中... ${pct}%`;
+            }
+          });
 
-        const url = URL.createObjectURL(blob);
+          const url = URL.createObjectURL(blob);
 
-        fabric.Image.fromURL(url, (fabricImg) => {
+          fabric.Image.fromURL(url, (fabricImg) => {
+            fabricImg.scaleToWidth(canvas.width * 0.6);
+            canvas.add(fabricImg);
+            canvas.centerObject(fabricImg);
+            canvas.setActiveObject(fabricImg);
+            statusEl.innerText = "去背成功並已加入畫布！";
+            removeBgBtn.disabled = false;
+          });
+        } catch (err) {
+          statusEl.innerText = "去背失敗，請檢查網路連線。";
+          console.error(err);
+          removeBgBtn.disabled = false;
+        }
+      });
+
+      // 3. 不去背直接加入圖片
+      addDirectBtn.addEventListener('click', () => {
+        if (!currentFile) return;
+        const imageUrl = URL.createObjectURL(currentFile);
+        fabric.Image.fromURL(imageUrl, (fabricImg) => {
           fabricImg.scaleToWidth(canvas.width * 0.6);
           canvas.add(fabricImg);
           canvas.centerObject(fabricImg);
           canvas.setActiveObject(fabricImg);
-          statusEl.innerText = "去背成功並已加入畫布！";
-          removeBgBtn.disabled = false;
+          statusEl.innerText = "圖片已加入畫布！";
         });
-      } catch (err) {
-        statusEl.innerText = "去背失敗，請確認網路連線。";
-        console.error(err);
-        removeBgBtn.disabled = false;
-      }
-    });
-
-    // 不去背直接加入
-    addDirectBtn.addEventListener('click', () => {
-      if (!currentFile) return;
-      const imageUrl = URL.createObjectURL(currentFile);
-      fabric.Image.fromURL(imageUrl, (fabricImg) => {
-        fabricImg.scaleToWidth(canvas.width * 0.6);
-        canvas.add(fabricImg);
-        canvas.centerObject(fabricImg);
       });
-    });
 
-    // 新增文字
-    document.getElementById('addTextBtn').addEventListener('click', () => {
-      const val = document.getElementById('textInput').value || '預設標題';
-      const text = new fabric.Text(val, {
-        left: canvas.width / 4,
-        top: 50,
-        fontSize: 28,
-        fontWeight: 'bold',
-        fill: '#2c2416'
+      // 4. 新增文字圖層
+      document.getElementById('addTextBtn').addEventListener('click', () => {
+        const val = document.getElementById('textInput').value || '預設標題';
+        const text = new fabric.Text(val, {
+          left: canvas.width / 4,
+          top: 50,
+          fontSize: 28,
+          fontWeight: 'bold',
+          fill: '#2c2416'
+        });
+        canvas.add(text);
+        canvas.setActiveObject(text);
       });
-      canvas.add(text);
-      canvas.setActiveObject(text);
-    });
 
-    // 刪除圖層邏輯
-    function deleteActiveObject() {
-      const activeObjects = canvas.getActiveObjects();
-      if (activeObjects && activeObjects.length > 0) {
-        activeObjects.forEach((obj) => canvas.remove(obj));
-        canvas.discardActiveObject();
-        canvas.requestRenderAll();
+      // 5. 刪除圖層邏輯
+      function deleteActiveObject() {
+        const activeObjects = canvas.getActiveObjects();
+        if (activeObjects && activeObjects.length > 0) {
+          activeObjects.forEach((obj) => canvas.remove(obj));
+          canvas.discardActiveObject();
+          canvas.requestRenderAll();
+        }
       }
-    }
 
-    deleteBtn.addEventListener('click', deleteActiveObject);
+      deleteBtn.addEventListener('click', deleteActiveObject);
 
-    window.addEventListener('keydown', (e) => {
-      if ((e.key === 'Delete' || e.key === 'Backspace') && e.target.tagName !== 'INPUT') {
-        deleteActiveObject();
-      }
-    });
+      window.addEventListener('keydown', (e) => {
+        if ((e.key === 'Delete' || e.key === 'Backspace') && e.target.tagName !== 'INPUT') {
+          deleteActiveObject();
+        }
+      });
 
-    // 背景調色
-    document.getElementById('bgColorPicker').addEventListener('input', (e) => {
-      canvas.setBackgroundColor(e.target.value, canvas.renderAll.bind(canvas));
-    });
+      // 6. 背景顏色切換
+      document.getElementById('bgColorPicker').addEventListener('input', (e) => {
+        canvas.setBackgroundColor(e.target.value, () => canvas.renderAll());
+      });
 
-    // 匯出 PNG
-    document.getElementById('downloadBtn').addEventListener('click', () => {
-      const dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
-      const link = document.createElement('a');
-      link.download = '合成設計圖.png';
-      link.href = dataURL;
-      link.click();
+      // 7. 匯出 PNG 檔
+      document.getElementById('downloadBtn').addEventListener('click', () => {
+        const dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
+        const link = document.createElement('a');
+        link.download = '合成設計圖.png';
+        link.href = dataURL;
+        link.click();
+      });
     });
   </script>
 </body>
