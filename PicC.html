@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>簡單海報製作 (v1.4.1)</title>
+  <title>EASY TOOL (v1.5.0)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
@@ -230,7 +230,7 @@
       <option value="zh">繁體中文</option>
       <option value="en">English</option>
     </select>
-    <span class="version-tag">v1.4.1</span>
+    <span class="version-tag">v1.5.0</span>
   </div>
 
   <div class="tab-bar">
@@ -362,7 +362,7 @@
 
     var translations = {
       zh: {
-        title: "簡單海報製作 (v1.4.1)",
+        title: "簡單海報製作 (v1.5.0)",
         tabCanvas: "📐 底圖",
         tabImage: "📷 上傳圖",
         tabText: "✍️ 文字",
@@ -371,7 +371,30 @@
         lblWidth: "寬:",
         lblHeight: "高:",
         applyCanvasSizeBtn: "套用",
+        
+        // 上傳圖與去背介面
         statusSelectImg: "請先選擇一張圖片",
+        statusImgLoaded: "圖片已載入，可以開始清除背景了",
+        statusSampling: "請在主畫布圖片上點一下要消除的顏色",
+        statusSampled: "已選取顏色，可以按「開始清除背景」",
+        statusProcessing: "處理中，請稍候…",
+        statusDone: "清除完成！不滿意可按「還原原圖」重來",
+        statusRestored: "已還原成原圖",
+        statusAdded: "已更新至畫布！",
+        tabAuto: "自動去背模式",
+        tabManual: "手動選色模式",
+        lblColorToEliminate: "要消除的顏色：",
+        sampleBtn: "點圖取色",
+        lblStrengthTitle: "去背強度（數字越大消除越多）",
+        processBtn: "開始清除背景",
+        restoreBtn: "還原原圖",
+        addToCanvasBtn: "加入畫布",
+        hintDefault: "選擇圖片後，按「開始清除背景」即可。不滿意可按「還原原圖」再重試。",
+        hintSampling: "點擊畫布圖片上的背景顏色",
+        hintSampled: "顏色已選好，調整強度後按開始清除背景",
+        hintDone: "可調整強度後再按「開始清除背景」，或按還原。",
+        hintRestored: "可改強度或換模式，再按「開始清除背景」",
+
         textPlaceholder: "請輸入文字...",
         defaultTextVal: "請在這邊輸入文字",
         lblTextColor: "顏色:",
@@ -395,7 +418,7 @@
         fontMing: "新細明體"
       },
       en: {
-        title: "Simple Poster Maker (v1.4.1)",
+        title: "Simple Poster Maker (v1.5.0)",
         tabCanvas: "📐 Canvas",
         tabImage: "📷 Image",
         tabText: "✍️ Text",
@@ -404,7 +427,30 @@
         lblWidth: "W:",
         lblHeight: "H:",
         applyCanvasSizeBtn: "Apply",
+        
+        // Image & Bg Removal UI
         statusSelectImg: "Please select an image first",
+        statusImgLoaded: "Image loaded. Ready to remove background",
+        statusSampling: "Click on the image in the canvas to pick a color",
+        statusSampled: "Color picked. Click 'Remove BG' to start",
+        statusProcessing: "Processing, please wait...",
+        statusDone: "BG Removed! Click 'Restore' if needed",
+        statusRestored: "Restored to original image",
+        statusAdded: "Updated to canvas!",
+        tabAuto: "Auto Mode",
+        tabManual: "Manual Color Mode",
+        lblColorToEliminate: "Color to remove:",
+        sampleBtn: "Pick Color",
+        lblStrengthTitle: "Tolerance (Higher value removes more)",
+        processBtn: "Remove BG",
+        restoreBtn: "Restore",
+        addToCanvasBtn: "Add to Canvas",
+        hintDefault: "Select an image and click 'Remove BG'. You can restore if not satisfied.",
+        hintSampling: "Click on the background color of the image",
+        hintSampled: "Color picked. Adjust strength and click Remove BG",
+        hintDone: "Adjust strength and click Remove BG again, or restore.",
+        hintRestored: "Adjust strength or switch mode, then click Remove BG",
+
         textPlaceholder: "Enter text...",
         defaultTextVal: "Enter Text Here",
         lblTextColor: "Color:",
@@ -444,6 +490,30 @@
       document.getElementById('lblHeight').innerText = t.lblHeight;
       document.getElementById('applyCanvasSizeBtn').innerText = t.applyCanvasSizeBtn;
 
+      // Image tab translations
+      document.getElementById('tabAuto').innerText = t.tabAuto;
+      document.getElementById('tabManual').innerText = t.tabManual;
+      document.getElementById('lblColorToEliminate').innerText = t.lblColorToEliminate;
+      document.getElementById('sampleBtn').innerText = t.sampleBtn;
+      document.getElementById('lblStrengthTitle').innerText = t.lblStrengthTitle;
+      document.getElementById('processBtn').innerText = t.processBtn;
+      document.getElementById('restoreBtn').innerText = t.restoreBtn;
+      document.getElementById('addToCanvasBtn').innerText = t.addToCanvasBtn;
+      
+      var statusElem = document.getElementById('status');
+      if (statusElem.dataset.state) {
+        statusElem.innerText = t[statusElem.dataset.state] || t.statusSelectImg;
+      } else {
+        statusElem.innerText = t.statusSelectImg;
+      }
+
+      var hintElem = document.getElementById('hint');
+      if (hintElem.dataset.state) {
+        hintElem.innerText = t[hintElem.dataset.state] || t.hintDefault;
+      } else {
+        hintElem.innerText = t.hintDefault;
+      }
+
       var textInput = document.getElementById('textInput');
       textInput.placeholder = t.textPlaceholder;
       if (textInput.value === translations['zh'].defaultTextVal || textInput.value === translations['en'].defaultTextVal) {
@@ -475,6 +545,21 @@
       fontSelect.options[1].text = t.fontSans;
       fontSelect.options[2].text = t.fontKai;
       fontSelect.options[3].text = t.fontMing;
+    }
+
+    function setStatusAndHint(statusState, hintState) {
+      var t = translations[currentLang];
+      var statusElem = document.getElementById('status');
+      var hintElem = document.getElementById('hint');
+
+      if (statusState) {
+        statusElem.dataset.state = statusState;
+        statusElem.innerText = t[statusState];
+      }
+      if (hintState) {
+        hintElem.dataset.state = hintState;
+        hintElem.innerText = t[hintState];
+      }
     }
 
     function disableDrawingMode() {
@@ -703,10 +788,9 @@
         link.click();
       });
 
-      // --- 去背邏輯修復版 ---
+      // --- 去背邏輯修復與雙語化控制 ---
       (function initBgRemove() {
         const fileInput = document.getElementById('fileInput');
-        const status = document.getElementById('status');
         const processBtn = document.getElementById('processBtn');
         const restoreBtn = document.getElementById('restoreBtn');
         const addToCanvasBtn = document.getElementById('addToCanvasBtn');
@@ -717,7 +801,6 @@
         const tabAuto = document.getElementById('tabAuto');
         const tabManual = document.getElementById('tabManual');
         const manualPanel = document.getElementById('manualPanel');
-        const hint = document.getElementById('hint');
 
         const tempCanvas = document.createElement('canvas');
         const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
@@ -746,12 +829,11 @@
 
         sampleBtn.onclick = () => {
           if (!originalImageData) {
-            status.textContent = '請先選擇圖片';
+            setStatusAndHint('statusSelectImg', 'hintDefault');
             return;
           }
           sampling = true;
-          status.textContent = '請在主畫布圖片上點一下要消除的顏色';
-          hint.textContent = '點擊畫布圖片上的背景顏色';
+          setStatusAndHint('statusSampling', 'hintSampling');
         };
 
         canvas.on('mouse:down', function(options) {
@@ -761,7 +843,6 @@
           if (activeObj !== currentProcessedImg) return;
 
           const pointer = canvas.getPointer(options.e);
-          
           const localPoint = currentProcessedImg.toLocalPoint(pointer, 'left', 'top');
           
           const x = Math.floor(localPoint.x + (currentProcessedImg.width / 2));
@@ -772,8 +853,7 @@
             const hex = '#' + [data[0], data[1], data[2]].map(v => v.toString(16).padStart(2, '0')).join('');
             colorPicker.value = hex;
             sampling = false;
-            status.textContent = '已選取顏色，可以按「開始清除背景」';
-            hint.textContent = '顏色已選好，調整強度後按開始清除背景';
+            setStatusAndHint('statusSampled', 'hintSampled');
           }
         });
 
@@ -800,9 +880,8 @@
               processBtn.disabled = false;
               restoreBtn.disabled = false;
               addToCanvasBtn.disabled = false;
-              status.textContent = '圖片已載入，可以開始清除背景了';
-              hint.textContent = '按「開始清除背景」。不滿意就按「還原原圖」再試。';
               
+              setStatusAndHint('statusImgLoaded', 'hintDefault');
               addTempCanvasToFabric();
             };
             img.src = event.target.result;
@@ -848,14 +927,13 @@
           if (!originalImageData) return;
           tempCtx.putImageData(originalImageData, 0, 0);
           sampling = false;
-          status.textContent = '已還原成原圖';
-          hint.textContent = '可改強度或換模式，再按「開始清除背景」';
+          setStatusAndHint('statusRestored', 'hintRestored');
           addTempCanvasToFabric();
         };
 
         processBtn.onclick = function() {
           if (!originalImageData) return;
-          status.textContent = '處理中，請稍候…';
+          setStatusAndHint('statusProcessing', 'hintDefault');
           processBtn.disabled = true;
 
           setTimeout(function() {
@@ -889,8 +967,7 @@
 
             tempCtx.putImageData(out, 0, 0);
             processBtn.disabled = false;
-            status.textContent = '清除完成！不滿意可按「還原原圖」重來';
-            hint.textContent = '可調整強度後再按「開始清除背景」，或按還原。';
+            setStatusAndHint('statusDone', 'hintDone');
             
             addTempCanvasToFabric();
           }, 50);
@@ -898,7 +975,7 @@
 
         addToCanvasBtn.onclick = function() {
           addTempCanvasToFabric();
-          status.textContent = '已更新至畫布！';
+          setStatusAndHint('statusAdded', 'hintDone');
         };
       })();
 
