@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>簡單海報製作 (v1.0.9 圖層控制版)</title>
+  <title>簡單海報製作 (v1.1.0 自訂顏色去背版)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
@@ -100,7 +100,6 @@
       gap: 8px;
     }
 
-    /* 單列精簡表單樣式 */
     .form-row {
       display: flex;
       gap: 6px;
@@ -189,10 +188,10 @@
 
   <div class="app-header">
     <h1>簡單海報製作</h1>
-    <span class="version-tag">v1.0.9 單列圖層版</span>
+    <span class="version-tag">v1.1.0 自訂去背色版</span>
   </div>
 
-  <!-- 置頂常駐功能列 (刪除、最前、最後、下載) -->
+  <!-- 置頂常駐功能列 -->
   <div class="global-actions">
     <button id="bringToFrontBtn" class="btn-layer">🔝 移至最前</button>
     <button id="sendToBackBtn" class="btn-layer">⬇️ 移至最後</button>
@@ -208,7 +207,7 @@
 
   <div class="control-panel">
     
-    <!-- 分頁 1: 設定底圖大小與底色 (整合為單列) -->
+    <!-- 分頁 1: 設定底圖大小與底色 -->
     <div id="canvasTab" class="tab-content active">
       <div class="form-row">
         <div class="compact-field" style="flex: 0 0 75px;">
@@ -227,23 +226,30 @@
       </div>
     </div>
 
-    <!-- 分頁 2: 上傳圖片與去背 -->
+    <!-- 分頁 2: 上傳圖片與去背控制 -->
     <div id="imageTab" class="tab-content">
       <input type="file" id="imageInput" accept="image/*">
       
       <div id="bgControls" class="bg-controls">
         <div class="form-row">
-          <label>去背靈敏度：</label>
+          <label>目標去背色：</label>
+          <input type="color" id="targetColorPicker" value="#ffffff" style="flex: 0 0 45px;">
+          <button id="pickColorBtn" class="btn-action" style="flex: 1;">🧪 吸取去背色</button>
+        </div>
+
+        <div class="form-row">
+          <label>靈敏度：</label>
           <input type="range" id="distanceRange" min="0.05" max="0.5" step="0.01" value="0.15">
           <span id="rangeVal" style="font-weight: bold; min-width: 35px; font-size: 13px;">0.15</span>
         </div>
-        <button id="removeBgColorBtn" class="btn-magic">🪄 執行消除白底</button>
+        
+        <button id="removeBgColorBtn" class="btn-magic">🪄 執行消除指定背景色</button>
       </div>
 
       <div id="status">點擊上方按鈕選擇圖片...</div>
     </div>
 
-    <!-- 分頁 3: 文字部分 (顏色、大小、字體 整合為單列) -->
+    <!-- 分頁 3: 文字部分 -->
     <div id="textTab" class="tab-content">
       <input type="text" id="textInput" placeholder="請輸入文字..." value="特惠商品 5 折起">
       
@@ -331,6 +337,9 @@
       var distanceRange = document.getElementById('distanceRange');
       var rangeVal = document.getElementById('rangeVal');
       
+      var targetColorPicker = document.getElementById('targetColorPicker');
+      var pickColorBtn = document.getElementById('pickColorBtn');
+
       var deleteBtn = document.getElementById('deleteBtn');
       var bringToFrontBtn = document.getElementById('bringToFrontBtn');
       var sendToBackBtn = document.getElementById('sendToBackBtn');
@@ -343,6 +352,22 @@
         rangeVal.innerText = e.target.value;
       });
 
+      // 滴管吸色邏輯
+      pickColorBtn.addEventListener('click', function() {
+        if ('EyeDropper' in window) {
+          const eyeDropper = new EyeDropper();
+          eyeDropper.open().then(result => {
+            targetColorPicker.value = result.sRGBHex;
+            statusEl.innerText = "已選取背景色：" + result.sRGBHex + "，可點擊「執行消除」！";
+          }).catch(e => {
+            console.log("吸管取消或不支援");
+          });
+        } else {
+          // 不支援滴管 API 時，直接觸發顏色選擇器
+          targetColorPicker.click();
+        }
+      });
+
       imageInput.addEventListener('change', function(e) {
         if (e.target.files.length > 0) {
           var file = e.target.files[0];
@@ -353,26 +378,29 @@
             canvas.add(img);
             canvas.centerObject(img);
             canvas.setActiveObject(img);
-            statusEl.innerText = "圖片已上傳！可調整靈敏度後點擊去背。";
+            statusEl.innerText = "圖片已上傳！請用「吸取去背色」選色後點擊去背。";
             bgControls.style.display = "flex";
           });
         }
       });
 
+      // 去除指定顏色
       removeBgColorBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj && activeObj.type === 'image') {
           activeObj.filters = [];
           var threshold = parseFloat(distanceRange.value);
+          var selectedColor = targetColorPicker.value;
+
           var filter = new fabric.Image.filters.RemoveColor({
-            color: '#FFFFFF',
+            color: selectedColor,
             distance: threshold
           });
           
           activeObj.filters.push(filter);
           activeObj.applyFilters();
           canvas.renderAll();
-          statusEl.innerText = "去背完成！（靈敏度: " + threshold + "）如挖空過頭請調小數值重試。";
+          statusEl.innerText = "去背完成！（消除顏色: " + selectedColor + ", 靈敏度: " + threshold + "）";
         } else {
           alert("請先點選畫布上的圖片！");
         }
@@ -428,7 +456,7 @@
         }
       });
 
-      // 圖層控制：移至最前
+      // 圖層控制
       bringToFrontBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj) {
@@ -439,7 +467,6 @@
         }
       });
 
-      // 圖層控制：移至最後
       sendToBackBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj) {
@@ -450,7 +477,6 @@
         }
       });
 
-      // 刪除選取
       deleteBtn.addEventListener('click', function() {
         var activeObjects = canvas.getActiveObjects();
         if (activeObjects && activeObjects.length > 0) {
@@ -468,7 +494,6 @@
         });
       });
 
-      // 下載圖
       document.getElementById('downloadBtn').addEventListener('click', function() {
         var dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
         var link = document.createElement('a');
