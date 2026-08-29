@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>純前端 AI 去背與圖文合成工具</title>
+  <title>純前端 AI 去背與圖文合成工具 (v1.0.1)</title>
   
-  <!-- 1. 載入 Fabric.js (畫布套件) -->
+  <!-- 1. 載入 Fabric.js (繪圖畫布套件) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
   <style>
@@ -43,6 +43,19 @@
       color: #3a2e18;
       border-bottom: 2px solid rgba(60, 45, 20, 0.2);
       padding-bottom: 8px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .version-tag {
+      font-size: 12px;
+      color: #6c5d47;
+      font-weight: normal;
+      background: rgba(255, 255, 255, 0.6);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(60, 45, 20, 0.15);
     }
 
     .panel-group {
@@ -104,6 +117,14 @@
       overflow: hidden;
     }
 
+    .version-footer {
+      margin-top: 12px;
+      font-size: 12px;
+      color: rgba(60, 45, 20, 0.7);
+      text-align: center;
+      font-weight: 500;
+    }
+
     #status {
       font-size: 12px;
       color: #4a3b22;
@@ -141,7 +162,10 @@
 
   <div class="app-container">
     <div class="sidebar">
-      <h2>AI 圖文工作室</h2>
+      <h2>
+        <span>AI 圖文工作室</span>
+        <span class="version-tag">v1.0.1</span>
+      </h2>
 
       <!-- 1. 去背區塊 -->
       <div class="panel-group">
@@ -173,15 +197,28 @@
       <div class="canvas-container-wrapper">
         <canvas id="c" width="500" height="500"></canvas>
       </div>
+      <!-- 畫布下方的版本與更新資訊 -->
+      <div class="version-footer">
+        當前部署版本：<strong style="color: #2c2416;">v1.0.1</strong> (更新時間: 2026-08-29)
+      </div>
     </div>
   </div>
 
-  <!-- 2. 載入 @imgly/background-removal 模組 -->
-  <script type="module">
-    import removeBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/index.mjs';
+  <script>
+    console.log("【PicC.html】已成功載入最新版本：v1.0.1");
 
-    // 確保 DOM 載入後才執行 Javascript 邏輯
-    window.addEventListener('DOMContentLoaded', () => {
+    // 使用非同步隔離載入 AI 去背模組，避免阻礙畫布功能
+    let removeBackground = null;
+    import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/index.mjs')
+      .then(module => {
+        removeBackground = module.default;
+        console.log("[v1.0.1] AI 去背套件載入成功！");
+      })
+      .catch(err => {
+        console.warn("[v1.0.1] AI 套件載入受阻，但繪圖排版功能依然可用：", err);
+      });
+
+    document.addEventListener('DOMContentLoaded', function() {
       // 初始化 Fabric 畫布
       const canvas = new fabric.Canvas('c', {
         backgroundColor: '#ffffff'
@@ -208,7 +245,7 @@
       let currentFile = null;
 
       // 1. 選擇檔案
-      imageInput.addEventListener('change', (e) => {
+      imageInput.addEventListener('change', function(e) {
         if (e.target.files.length > 0) {
           currentFile = e.target.files[0];
           removeBgBtn.disabled = false;
@@ -218,8 +255,13 @@
       });
 
       // 2. AI 去背邏輯
-      removeBgBtn.addEventListener('click', async () => {
+      removeBgBtn.addEventListener('click', async function() {
         if (!currentFile) return;
+
+        if (!removeBackground) {
+          alert("AI 模組尚未載入完畢或被網路封鎖，建議直接使用「不去背直接加入」。");
+          return;
+        }
 
         removeBgBtn.disabled = true;
         statusEl.innerText = "AI 去背計算中（第一次需要下載資源，請稍候）...";
@@ -234,7 +276,7 @@
 
           const url = URL.createObjectURL(blob);
 
-          fabric.Image.fromURL(url, (fabricImg) => {
+          fabric.Image.fromURL(url, function(fabricImg) {
             fabricImg.scaleToWidth(canvas.width * 0.6);
             canvas.add(fabricImg);
             canvas.centerObject(fabricImg);
@@ -250,10 +292,10 @@
       });
 
       // 3. 不去背直接加入圖片
-      addDirectBtn.addEventListener('click', () => {
+      addDirectBtn.addEventListener('click', function() {
         if (!currentFile) return;
         const imageUrl = URL.createObjectURL(currentFile);
-        fabric.Image.fromURL(imageUrl, (fabricImg) => {
+        fabric.Image.fromURL(imageUrl, function(fabricImg) {
           fabricImg.scaleToWidth(canvas.width * 0.6);
           canvas.add(fabricImg);
           canvas.centerObject(fabricImg);
@@ -263,7 +305,7 @@
       });
 
       // 4. 新增文字圖層
-      document.getElementById('addTextBtn').addEventListener('click', () => {
+      document.getElementById('addTextBtn').addEventListener('click', function() {
         const val = document.getElementById('textInput').value || '預設標題';
         const text = new fabric.Text(val, {
           left: canvas.width / 4,
@@ -280,7 +322,7 @@
       function deleteActiveObject() {
         const activeObjects = canvas.getActiveObjects();
         if (activeObjects && activeObjects.length > 0) {
-          activeObjects.forEach((obj) => canvas.remove(obj));
+          activeObjects.forEach(obj => canvas.remove(obj));
           canvas.discardActiveObject();
           canvas.requestRenderAll();
         }
@@ -288,19 +330,21 @@
 
       deleteBtn.addEventListener('click', deleteActiveObject);
 
-      window.addEventListener('keydown', (e) => {
+      window.addEventListener('keydown', function(e) {
         if ((e.key === 'Delete' || e.key === 'Backspace') && e.target.tagName !== 'INPUT') {
           deleteActiveObject();
         }
       });
 
       // 6. 背景顏色切換
-      document.getElementById('bgColorPicker').addEventListener('input', (e) => {
-        canvas.setBackgroundColor(e.target.value, () => canvas.renderAll());
+      document.getElementById('bgColorPicker').addEventListener('input', function(e) {
+        canvas.setBackgroundColor(e.target.value, function() {
+          canvas.renderAll();
+        });
       });
 
       // 7. 匯出 PNG 檔
-      document.getElementById('downloadBtn').addEventListener('click', () => {
+      document.getElementById('downloadBtn').addEventListener('click', function() {
         const dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
         const link = document.createElement('a');
         link.download = '合成設計圖.png';
