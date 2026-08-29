@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>純前端 AI 去背與圖文合成工具 (v1.0.1)</title>
+  <title>純前端 AI 去背與圖文合成工具 (v1.0.2)</title>
   
   <!-- 1. 載入 Fabric.js (繪圖畫布套件) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
@@ -12,7 +12,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: #c0ab79;
       color: #2c2416;
       display: flex;
@@ -34,7 +34,7 @@
       padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
       overflow-y: auto;
     }
 
@@ -73,14 +73,28 @@
       letter-spacing: 0.5px;
     }
 
-    button, input[type="file"], input[type="color"], input[type="text"] {
-      width: 100%;
-      padding: 10px;
+    .form-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
       margin-top: 6px;
+    }
+
+    .form-row label {
+      font-size: 12px;
+      color: #4a3b22;
+      white-space: nowrap;
+      min-width: 60px;
+    }
+
+    button, input[type="file"], input[type="color"], input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 4px;
       border: 1px solid rgba(60, 45, 20, 0.25);
       border-radius: 6px;
-      font-size: 14px;
-      background: rgba(255, 255, 255, 0.8);
+      font-size: 13px;
+      background: rgba(255, 255, 255, 0.85);
       color: #2c2416;
     }
 
@@ -91,6 +105,8 @@
       font-weight: bold;
       cursor: pointer;
       transition: background 0.2s;
+      padding: 10px;
+      margin-top: 8px;
     }
 
     button:hover { background: #352a17; }
@@ -164,7 +180,7 @@
     <div class="sidebar">
       <h2>
         <span>AI 圖文工作室</span>
-        <span class="version-tag">v1.0.1</span>
+        <span class="version-tag">v1.0.2</span>
       </h2>
 
       <!-- 1. 去背區塊 -->
@@ -173,23 +189,48 @@
         <input type="file" id="imageInput" accept="image/*">
         <button id="removeBgBtn" disabled>執行 AI 去背並加入畫布</button>
         <button id="addDirectBtn" style="background:#6c5d47;" disabled>不去背直接加入</button>
-        <div id="status">請先選擇圖片...</div>
+        <div id="status">準備載入 AI 去背模組...</div>
       </div>
 
       <!-- 2. 排版編輯區塊 -->
       <div class="panel-group">
         <h3>2. 圖層與文字編輯</h3>
         <input type="text" id="textInput" placeholder="輸入標題或內文..." value="特惠商品 5 折起">
+        
+        <div class="form-row">
+          <label>文字顏色：</label>
+          <input type="color" id="textColorPicker" value="#2c2416">
+        </div>
+
+        <div class="form-row">
+          <label>字型大小：</label>
+          <input type="number" id="fontSizeInput" value="28" min="12" max="120">
+        </div>
+
+        <div class="form-row">
+          <label>選擇字體：</label>
+          <select id="fontFamilySelect">
+            <option value="sans-serif">預設無襯線體 (Sans-Serif)</option>
+            <option value="Microsoft JhengHei">微軟正黑體</option>
+            <option value="DFKai-SB">標楷體</option>
+            <option value="PMingLiU">新細明體</option>
+            <option value="Impact">粗體英文 (Impact)</option>
+            <option value="Georgia">優雅襯線體 (Georgia)</option>
+          </select>
+        </div>
+
         <button id="addTextBtn">新增文字圖層</button>
-        <button id="deleteBtn" class="btn-delete" style="margin-top: 10px;">刪除選取圖層</button>
+        <button id="deleteBtn" class="btn-delete" style="margin-top: 8px;">刪除選取圖層</button>
       </div>
 
       <!-- 3. 背景與匯出 -->
       <div class="panel-group">
         <h3>3. 畫布設定與匯出</h3>
-        <label style="font-size: 12px; color: #4a3b22;">背景顏色：</label>
-        <input type="color" id="bgColorPicker" value="#ffffff">
-        <button id="downloadBtn" style="background: #2d7a42; margin-top: 12px;">匯出 PNG 成品</button>
+        <div class="form-row">
+          <label>背景顏色：</label>
+          <input type="color" id="bgColorPicker" value="#ffffff">
+        </div>
+        <button id="downloadBtn" style="background: #2d7a42; margin-top: 10px;">匯出 PNG 成品</button>
       </div>
     </div>
 
@@ -197,34 +238,37 @@
       <div class="canvas-container-wrapper">
         <canvas id="c" width="500" height="500"></canvas>
       </div>
-      <!-- 畫布下方的版本與更新資訊 -->
       <div class="version-footer">
-        當前部署版本：<strong style="color: #2c2416;">v1.0.1</strong> (更新時間: 2026-08-29)
+        當前部署版本：<strong style="color: #2c2416;">v1.0.2</strong> (更新時間: 2026-08-29)
       </div>
     </div>
   </div>
 
   <script>
-    console.log("【PicC.html】已成功載入最新版本：v1.0.1");
+    console.log("【PicC.html】已載入版本：v1.0.2");
 
-    // 使用非同步隔離載入 AI 去背模組，避免阻礙畫布功能
     let removeBackground = null;
-    import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/index.mjs')
-      .then(module => {
+
+    // 非同步載入 AI 去背套件
+    async function loadAiModule() {
+      const statusEl = document.getElementById('status');
+      try {
+        const module = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/index.mjs');
         removeBackground = module.default;
-        console.log("[v1.0.1] AI 去背套件載入成功！");
-      })
-      .catch(err => {
-        console.warn("[v1.0.1] AI 套件載入受阻，但繪圖排版功能依然可用：", err);
-      });
+        statusEl.innerText = "AI 去背模組已就緒，請選擇圖片。";
+      } catch (err) {
+        console.warn("AI 模組網路阻擋，切換為基礎繪圖模式：", err);
+        statusEl.innerText = "AI 去背套件受阻，仍可直接新增圖片與文字。";
+      }
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
-      // 初始化 Fabric 畫布
+      loadAiModule();
+
       const canvas = new fabric.Canvas('c', {
         backgroundColor: '#ffffff'
       });
 
-      // 手機寬度自適應
       function resizeCanvasForMobile() {
         const screenWidth = window.innerWidth;
         if (screenWidth < 540) {
@@ -242,9 +286,13 @@
       const removeBgBtn = document.getElementById('removeBgBtn');
       const addDirectBtn = document.getElementById('addDirectBtn');
       const deleteBtn = document.getElementById('deleteBtn');
+      
+      const textColorPicker = document.getElementById('textColorPicker');
+      const fontSizeInput = document.getElementById('fontSizeInput');
+      const fontFamilySelect = document.getElementById('fontFamilySelect');
+
       let currentFile = null;
 
-      // 1. 選擇檔案
       imageInput.addEventListener('change', function(e) {
         if (e.target.files.length > 0) {
           currentFile = e.target.files[0];
@@ -254,23 +302,23 @@
         }
       });
 
-      // 2. AI 去背邏輯
+      // 1. AI 去背
       removeBgBtn.addEventListener('click', async function() {
         if (!currentFile) return;
 
         if (!removeBackground) {
-          alert("AI 模組尚未載入完畢或被網路封鎖，建議直接使用「不去背直接加入」。");
+          alert("AI 模組尚未載入完畢或被網路封鎖，請改用「不去背直接加入」。");
           return;
         }
 
         removeBgBtn.disabled = true;
-        statusEl.innerText = "AI 去背計算中（第一次需要下載資源，請稍候）...";
+        statusEl.innerText = "AI 去背計算中，請稍候...";
 
         try {
           const blob = await removeBackground(currentFile, {
             progress: (key, current, total) => {
               const pct = Math.round((current / total) * 100) || 0;
-              statusEl.innerText = `下載 AI 模組中... ${pct}%`;
+              statusEl.innerText = `下載 AI 模組資源中... ${pct}%`;
             }
           });
 
@@ -291,7 +339,7 @@
         }
       });
 
-      // 3. 不去背直接加入圖片
+      // 2. 不去背直接加入
       addDirectBtn.addEventListener('click', function() {
         if (!currentFile) return;
         const imageUrl = URL.createObjectURL(currentFile);
@@ -304,21 +352,59 @@
         });
       });
 
-      // 4. 新增文字圖層
+      // 3. 新增文字圖層（採用目前選擇的顏色、大小與字型）
       document.getElementById('addTextBtn').addEventListener('click', function() {
         const val = document.getElementById('textInput').value || '預設標題';
         const text = new fabric.Text(val, {
           left: canvas.width / 4,
           top: 50,
-          fontSize: 28,
-          fontWeight: 'bold',
-          fill: '#2c2416'
+          fontSize: parseInt(fontSizeInput.value, 10) || 28,
+          fill: textColorPicker.value,
+          fontFamily: fontFamilySelect.value,
+          fontWeight: 'bold'
         });
         canvas.add(text);
         canvas.setActiveObject(text);
       });
 
-      // 5. 刪除圖層邏輯
+      // 4. 即時修改畫面上已選取的文字屬性
+      canvas.on('selection:created', updateSidebarFromText);
+      canvas.on('selection:updated', updateSidebarFromText);
+
+      function updateSidebarFromText() {
+        const activeObj = canvas.getActiveObject();
+        if (activeObj && activeObj.type === 'text') {
+          textColorPicker.value = activeObj.fill;
+          fontSizeInput.value = activeObj.fontSize;
+          fontFamilySelect.value = activeObj.fontFamily;
+        }
+      }
+
+      textColorPicker.addEventListener('input', function(e) {
+        const activeObj = canvas.getActiveObject();
+        if (activeObj && activeObj.type === 'text') {
+          activeObj.set('fill', e.target.value);
+          canvas.renderAll();
+        }
+      });
+
+      fontSizeInput.addEventListener('input', function(e) {
+        const activeObj = canvas.getActiveObject();
+        if (activeObj && activeObj.type === 'text') {
+          activeObj.set('fontSize', parseInt(e.target.value, 10) || 20);
+          canvas.renderAll();
+        }
+      });
+
+      fontFamilySelect.addEventListener('change', function(e) {
+        const activeObj = canvas.getActiveObject();
+        if (activeObj && activeObj.type === 'text') {
+          activeObj.set('fontFamily', e.target.value);
+          canvas.renderAll();
+        }
+      });
+
+      // 5. 刪除圖層
       function deleteActiveObject() {
         const activeObjects = canvas.getActiveObjects();
         if (activeObjects && activeObjects.length > 0) {
@@ -336,14 +422,14 @@
         }
       });
 
-      // 6. 背景顏色切換
+      // 6. 背景顏色
       document.getElementById('bgColorPicker').addEventListener('input', function(e) {
         canvas.setBackgroundColor(e.target.value, function() {
           canvas.renderAll();
         });
       });
 
-      // 7. 匯出 PNG 檔
+      // 7. 匯出 PNG
       document.getElementById('downloadBtn').addEventListener('click', function() {
         const dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
         const link = document.createElement('a');
