@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>純前端 AI 去背與圖文合成工具 (v1.0.2)</title>
+  <title>簡易圖文合成工具 (v1.0.3)</title>
   
-  <!-- 1. 載入 Fabric.js (繪圖畫布套件) -->
+  <!-- 載入 Fabric.js 畫布套件 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", "Segoe UI", sans-serif;
       background-color: #c0ab79;
       color: #2c2416;
       display: flex;
@@ -28,7 +28,7 @@
 
     .sidebar {
       width: 340px;
-      background: rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.55);
       backdrop-filter: blur(10px);
       border-right: 1px solid rgba(255, 255, 255, 0.4);
       padding: 20px;
@@ -39,62 +39,62 @@
     }
 
     h2 {
-      font-size: 20px;
+      font-size: 22px;
       color: #3a2e18;
       border-bottom: 2px solid rgba(60, 45, 20, 0.2);
       padding-bottom: 8px;
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
     }
 
     .version-tag {
       font-size: 12px;
       color: #6c5d47;
-      font-weight: normal;
-      background: rgba(255, 255, 255, 0.6);
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid rgba(60, 45, 20, 0.15);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(60, 45, 20, 0.2);
     }
 
     .panel-group {
-      background: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.45);
       padding: 14px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
 
     .panel-group h3 {
-      font-size: 13px;
-      color: #4a3b22;
+      font-size: 14px;
+      color: #3a2e18;
       margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-weight: bold;
     }
 
     .form-row {
       display: flex;
       gap: 8px;
       align-items: center;
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
     .form-row label {
-      font-size: 12px;
-      color: #4a3b22;
+      font-size: 13px;
+      color: #2c2416;
       white-space: nowrap;
-      min-width: 60px;
+      min-width: 70px;
+      font-weight: 500;
     }
 
     button, input[type="file"], input[type="color"], input[type="text"], input[type="number"], select {
       width: 100%;
-      padding: 8px 10px;
-      margin-top: 4px;
-      border: 1px solid rgba(60, 45, 20, 0.25);
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid rgba(60, 45, 20, 0.3);
       border-radius: 6px;
-      font-size: 13px;
-      background: rgba(255, 255, 255, 0.85);
+      font-size: 14px;
+      background: #ffffff;
       color: #2c2416;
     }
 
@@ -104,13 +104,18 @@
       border: none;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.2s;
-      padding: 10px;
-      margin-top: 8px;
+      font-size: 15px;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 6px;
     }
 
     button:hover { background: #352a17; }
-    button:disabled { background: rgba(100, 85, 60, 0.4); cursor: not-allowed; }
+
+    .btn-magic {
+      background: #d97706;
+    }
+    .btn-magic:hover { background: #b45309; }
 
     .btn-delete { background: #a83232; }
     .btn-delete:hover { background: #872424; }
@@ -142,35 +147,21 @@
     }
 
     #status {
-      font-size: 12px;
+      font-size: 13px;
       color: #4a3b22;
-      word-break: break-all;
       margin-top: 8px;
       line-height: 1.4;
-      font-weight: 500;
+      font-weight: bold;
+      background: rgba(255,255,255,0.5);
+      padding: 6px 10px;
+      border-radius: 4px;
     }
 
     @media (max-width: 768px) {
-      .app-container {
-        flex-direction: column;
-        height: auto;
-        overflow-y: auto;
-      }
-      .sidebar {
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-        padding: 15px;
-      }
-      .main-content {
-        width: 100%;
-        padding: 15px;
-      }
-      .canvas-container-wrapper {
-        max-width: 100%;
-        touch-action: none;
-      }
+      .app-container { flex-direction: column; height: auto; overflow-y: auto; }
+      .sidebar { width: 100%; height: auto; padding: 15px; }
+      .main-content { width: 100%; padding: 15px; }
+      .canvas-container-wrapper { max-width: 100%; }
     }
   </style>
 </head>
@@ -179,23 +170,22 @@
   <div class="app-container">
     <div class="sidebar">
       <h2>
-        <span>AI 圖文工作室</span>
-        <span class="version-tag">v1.0.2</span>
+        <span>簡單海報製作</span>
+        <span class="version-tag">v1.0.3</span>
       </h2>
 
-      <!-- 1. 去背區塊 -->
+      <!-- 1. 圖片區塊 -->
       <div class="panel-group">
-        <h3>1. 匯入圖片</h3>
+        <h3>1. 上傳圖片</h3>
         <input type="file" id="imageInput" accept="image/*">
-        <button id="removeBgBtn" disabled>執行 AI 去背並加入畫布</button>
-        <button id="addDirectBtn" style="background:#6c5d47;" disabled>不去背直接加入</button>
-        <div id="status">準備載入 AI 去背模組...</div>
+        <button id="removeBgColorBtn" class="btn-magic" style="display:none;">🪄 點選消除背景色</button>
+        <div id="status">請先上傳圖片...</div>
       </div>
 
-      <!-- 2. 排版編輯區塊 -->
+      <!-- 2. 文字編輯區塊 -->
       <div class="panel-group">
-        <h3>2. 圖層與文字編輯</h3>
-        <input type="text" id="textInput" placeholder="輸入標題或內文..." value="特惠商品 5 折起">
+        <h3>2. 加字與樣式</h3>
+        <input type="text" id="textInput" placeholder="請輸入文字..." value="特惠商品 5 折起">
         
         <div class="form-row">
           <label>文字顏色：</label>
@@ -203,34 +193,33 @@
         </div>
 
         <div class="form-row">
-          <label>字型大小：</label>
-          <input type="number" id="fontSizeInput" value="28" min="12" max="120">
+          <label>文字大小：</label>
+          <input type="number" id="fontSizeInput" value="32" min="12" max="120">
         </div>
 
         <div class="form-row">
           <label>選擇字體：</label>
           <select id="fontFamilySelect">
-            <option value="sans-serif">預設無襯線體 (Sans-Serif)</option>
             <option value="Microsoft JhengHei">微軟正黑體</option>
+            <option value="sans-serif">預設無襯線體</option>
             <option value="DFKai-SB">標楷體</option>
             <option value="PMingLiU">新細明體</option>
             <option value="Impact">粗體英文 (Impact)</option>
-            <option value="Georgia">優雅襯線體 (Georgia)</option>
           </select>
         </div>
 
-        <button id="addTextBtn">新增文字圖層</button>
-        <button id="deleteBtn" class="btn-delete" style="margin-top: 8px;">刪除選取圖層</button>
+        <button id="addTextBtn">＋ 新增文字</button>
+        <button id="deleteBtn" class="btn-delete">🗑️ 刪除選取項目</button>
       </div>
 
-      <!-- 3. 背景與匯出 -->
+      <!-- 3. 背景與下載 -->
       <div class="panel-group">
-        <h3>3. 畫布設定與匯出</h3>
+        <h3>3. 底色與儲存</h3>
         <div class="form-row">
-          <label>背景顏色：</label>
+          <label>畫布底色：</label>
           <input type="color" id="bgColorPicker" value="#ffffff">
         </div>
-        <button id="downloadBtn" style="background: #2d7a42; margin-top: 10px;">匯出 PNG 成品</button>
+        <button id="downloadBtn" style="background: #2d7a42; font-size: 16px;">💾 下載完成圖片</button>
       </div>
     </div>
 
@@ -239,40 +228,23 @@
         <canvas id="c" width="500" height="500"></canvas>
       </div>
       <div class="version-footer">
-        當前部署版本：<strong style="color: #2c2416;">v1.0.2</strong> (更新時間: 2026-08-29)
+        當前版本：<strong style="color: #2c2416;">v1.0.3 超簡易版</strong>
       </div>
     </div>
   </div>
 
   <script>
-    console.log("【PicC.html】已載入版本：v1.0.2");
-
-    let removeBackground = null;
-
-    // 非同步載入 AI 去背套件
-    async function loadAiModule() {
-      const statusEl = document.getElementById('status');
-      try {
-        const module = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/index.mjs');
-        removeBackground = module.default;
-        statusEl.innerText = "AI 去背模組已就緒，請選擇圖片。";
-      } catch (err) {
-        console.warn("AI 模組網路阻擋，切換為基礎繪圖模式：", err);
-        statusEl.innerText = "AI 去背套件受阻，仍可直接新增圖片與文字。";
-      }
-    }
+    console.log("【PicC.html】已載入最簡化版：v1.0.3");
 
     document.addEventListener('DOMContentLoaded', function() {
-      loadAiModule();
-
       const canvas = new fabric.Canvas('c', {
         backgroundColor: '#ffffff'
       });
 
+      // RWD 自適應
       function resizeCanvasForMobile() {
-        const screenWidth = window.innerWidth;
-        if (screenWidth < 540) {
-          const newSize = screenWidth - 40;
+        if (window.innerWidth < 540) {
+          const newSize = window.innerWidth - 40;
           canvas.setWidth(newSize);
           canvas.setHeight(newSize);
           canvas.renderAll();
@@ -283,82 +255,55 @@
 
       const statusEl = document.getElementById('status');
       const imageInput = document.getElementById('imageInput');
-      const removeBgBtn = document.getElementById('removeBgBtn');
-      const addDirectBtn = document.getElementById('addDirectBtn');
+      const removeBgColorBtn = document.getElementById('removeBgColorBtn');
       const deleteBtn = document.getElementById('deleteBtn');
-      
       const textColorPicker = document.getElementById('textColorPicker');
       const fontSizeInput = document.getElementById('fontSizeInput');
       const fontFamilySelect = document.getElementById('fontFamilySelect');
 
-      let currentFile = null;
-
+      // 1. 選擇並直接載入圖片
       imageInput.addEventListener('change', function(e) {
         if (e.target.files.length > 0) {
-          currentFile = e.target.files[0];
-          removeBgBtn.disabled = false;
-          addDirectBtn.disabled = false;
-          statusEl.innerText = "圖片已選擇，點擊「執行 AI 去背」或「直接加入」。";
-        }
-      });
+          const file = e.target.files[0];
+          const url = URL.createObjectURL(file);
 
-      // 1. AI 去背
-      removeBgBtn.addEventListener('click', async function() {
-        if (!currentFile) return;
-
-        if (!removeBackground) {
-          alert("AI 模組尚未載入完畢或被網路封鎖，請改用「不去背直接加入」。");
-          return;
-        }
-
-        removeBgBtn.disabled = true;
-        statusEl.innerText = "AI 去背計算中，請稍候...";
-
-        try {
-          const blob = await removeBackground(currentFile, {
-            progress: (key, current, total) => {
-              const pct = Math.round((current / total) * 100) || 0;
-              statusEl.innerText = `下載 AI 模組資源中... ${pct}%`;
-            }
+          fabric.Image.fromURL(url, function(img) {
+            img.scaleToWidth(canvas.width * 0.7);
+            canvas.add(img);
+            canvas.centerObject(img);
+            canvas.setActiveObject(img);
+            statusEl.innerText = "圖片已加入！如需去掉白底/單色背景，請點擊下方「消除背景色」。";
+            removeBgColorBtn.style.display = "block";
           });
-
-          const url = URL.createObjectURL(blob);
-
-          fabric.Image.fromURL(url, function(fabricImg) {
-            fabricImg.scaleToWidth(canvas.width * 0.6);
-            canvas.add(fabricImg);
-            canvas.centerObject(fabricImg);
-            canvas.setActiveObject(fabricImg);
-            statusEl.innerText = "去背成功並已加入畫布！";
-            removeBgBtn.disabled = false;
-          });
-        } catch (err) {
-          statusEl.innerText = "去背失敗，請檢查網路連線。";
-          console.error(err);
-          removeBgBtn.disabled = false;
         }
       });
 
-      // 2. 不去背直接加入
-      addDirectBtn.addEventListener('click', function() {
-        if (!currentFile) return;
-        const imageUrl = URL.createObjectURL(currentFile);
-        fabric.Image.fromURL(imageUrl, function(fabricImg) {
-          fabricImg.scaleToWidth(canvas.width * 0.6);
-          canvas.add(fabricImg);
-          canvas.centerObject(fabricImg);
-          canvas.setActiveObject(fabricImg);
-          statusEl.innerText = "圖片已加入畫布！";
-        });
+      // 2. 點擊消除背景色（去除白色/相近色）
+      removeBgColorBtn.addEventListener('click', function() {
+        const activeObj = canvas.getActiveObject();
+        if (activeObj && activeObj.type === 'image') {
+          // 使用 Fabric.js 內建的顏色過濾器消除背景
+          const filter = new fabric.Image.filters.RemoveColor({
+            color: '#FFFFFF', // 預設消除白色
+            distance: 0.2     // 容許度
+          });
+          
+          activeObj.filters.push(filter);
+          activeObj.applyFilters();
+          canvas.renderAll();
+          statusEl.innerText = "已消除背景白色！";
+        } else {
+          alert("請先在右側畫布上點選要去背的圖片！");
+        }
       });
 
-      // 3. 新增文字圖層（採用目前選擇的顏色、大小與字型）
+      // 3. 新增文字
       document.getElementById('addTextBtn').addEventListener('click', function() {
-        const val = document.getElementById('textInput').value || '預設標題';
+        const val = document.getElementById('textInput').value || '預設文字';
         const text = new fabric.Text(val, {
           left: canvas.width / 4,
-          top: 50,
-          fontSize: parseInt(fontSizeInput.value, 10) || 28,
+          top: 60,
+          fontSize: parseInt(fontSizeInput.value, 10) || 32,
           fill: textColorPicker.value,
           fontFamily: fontFamilySelect.value,
           fontWeight: 'bold'
@@ -367,11 +312,11 @@
         canvas.setActiveObject(text);
       });
 
-      // 4. 即時修改畫面上已選取的文字屬性
-      canvas.on('selection:created', updateSidebarFromText);
-      canvas.on('selection:updated', updateSidebarFromText);
+      // 4. 選取物件時自動同步樣式
+      canvas.on('selection:created', updateControlPanel);
+      canvas.on('selection:updated', updateControlPanel);
 
-      function updateSidebarFromText() {
+      function updateControlPanel() {
         const activeObj = canvas.getActiveObject();
         if (activeObj && activeObj.type === 'text') {
           textColorPicker.value = activeObj.fill;
@@ -380,6 +325,7 @@
         }
       }
 
+      // 5. 即時修改選中文字
       textColorPicker.addEventListener('input', function(e) {
         const activeObj = canvas.getActiveObject();
         if (activeObj && activeObj.type === 'text') {
@@ -404,7 +350,7 @@
         }
       });
 
-      // 5. 刪除圖層
+      // 6. 刪除
       function deleteActiveObject() {
         const activeObjects = canvas.getActiveObjects();
         if (activeObjects && activeObjects.length > 0) {
@@ -416,24 +362,18 @@
 
       deleteBtn.addEventListener('click', deleteActiveObject);
 
-      window.addEventListener('keydown', function(e) {
-        if ((e.key === 'Delete' || e.key === 'Backspace') && e.target.tagName !== 'INPUT') {
-          deleteActiveObject();
-        }
-      });
-
-      // 6. 背景顏色
+      // 7. 底色
       document.getElementById('bgColorPicker').addEventListener('input', function(e) {
         canvas.setBackgroundColor(e.target.value, function() {
           canvas.renderAll();
         });
       });
 
-      // 7. 匯出 PNG
+      // 8. 匯出 PNG
       document.getElementById('downloadBtn').addEventListener('click', function() {
         const dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
         const link = document.createElement('a');
-        link.download = '合成設計圖.png';
+        link.download = '海報設計.png';
         link.href = dataURL;
         link.click();
       });
