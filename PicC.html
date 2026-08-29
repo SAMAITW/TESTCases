@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>簡單海報製作 (v1.0.7 容忍度調節版)</title>
+  <title>簡單海報製作 (v1.0.8 固定列版)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
@@ -21,7 +21,7 @@
 
     .app-header {
       background: rgba(255, 255, 255, 0.5);
-      padding: 12px 16px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -29,18 +29,27 @@
     }
 
     .app-header h1 {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       color: #3a2e18;
     }
 
     .version-tag {
-      font-size: 13px;
+      font-size: 12px;
       color: #6c5d47;
       background: rgba(255, 255, 255, 0.85);
-      padding: 4px 8px;
-      border-radius: 12px;
+      padding: 3px 6px;
+      border-radius: 10px;
       font-weight: bold;
+    }
+
+    /* 全局常駐操作按鈕區 */
+    .global-actions {
+      display: flex;
+      gap: 10px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid rgba(60, 45, 20, 0.2);
     }
 
     .tab-bar {
@@ -51,10 +60,10 @@
 
     .tab-btn {
       flex: 1;
-      padding: 14px 5px;
+      padding: 12px 4px;
       background: transparent;
       border: none;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
       color: #4a3b22;
       cursor: pointer;
@@ -62,14 +71,14 @@
     }
 
     .tab-btn.active {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.75);
       color: #000000;
       border-bottom: 4px solid #d97706;
     }
 
     .control-panel {
-      background: rgba(255, 255, 255, 0.75);
-      padding: 16px;
+      background: rgba(255, 255, 255, 0.65);
+      padding: 14px 16px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.5);
     }
 
@@ -80,7 +89,7 @@
     .tab-content.active {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .form-row {
@@ -99,11 +108,11 @@
 
     button, input[type="file"], input[type="color"], input[type="text"], input[type="number"], select {
       width: 100%;
-      height: 48px;
-      padding: 8px 12px;
+      height: 44px;
+      padding: 6px 10px;
       border: 1px solid rgba(60, 45, 20, 0.35);
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 15px;
       background: #ffffff;
       color: #2c2416;
     }
@@ -113,13 +122,13 @@
       height: 28px;
     }
 
-    input[type="file"] { padding: 10px; height: auto; }
-    input[type="color"] { padding: 4px; cursor: pointer; }
+    input[type="file"] { padding: 8px; height: auto; }
+    input[type="color"] { padding: 3px; cursor: pointer; }
 
-    .btn-action { background: #4a3b22; color: #ffffff; font-weight: bold; font-size: 17px; }
-    .btn-magic { background: #d97706; color: #ffffff; font-weight: bold; font-size: 17px; }
-    .btn-delete { background: #a83232; color: #ffffff; font-weight: bold; font-size: 17px; }
-    .btn-download { background: #2d7a42; color: #ffffff; font-weight: bold; font-size: 18px; }
+    .btn-action { background: #4a3b22; color: #ffffff; font-weight: bold; font-size: 16px; }
+    .btn-magic { background: #d97706; color: #ffffff; font-weight: bold; font-size: 16px; }
+    .btn-delete { background: #a83232; color: #ffffff; font-weight: bold; font-size: 16px; }
+    .btn-download { background: #2d7a42; color: #ffffff; font-weight: bold; font-size: 16px; }
 
     .main-content {
       flex: 1;
@@ -127,7 +136,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 16px 10px;
+      padding: 12px 10px;
     }
 
     .canvas-container-wrapper {
@@ -138,11 +147,11 @@
     }
 
     #status {
-      font-size: 14px;
+      font-size: 13px;
       color: #3a2e18;
       font-weight: bold;
       background: rgba(255,255,255,0.8);
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 6px;
       text-align: center;
     }
@@ -162,18 +171,40 @@
 
   <div class="app-header">
     <h1>簡單海報製作</h1>
-    <span class="version-tag">v1.0.7 靈敏度版</span>
+    <span class="version-tag">v1.0.8 置頂按鈕版</span>
+  </div>
+
+  <!-- 置頂常駐功能列 -->
+  <div class="global-actions">
+    <button id="deleteBtn" class="btn-delete">🗑️ 刪除選取</button>
+    <button id="downloadBtn" class="btn-download">💾 下載圖</button>
   </div>
 
   <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('imageTab', this)">📷 上傳圖片</button>
+    <button class="tab-btn active" onclick="switchTab('canvasTab', this)">📐 底圖設定</button>
+    <button class="tab-btn" onclick="switchTab('imageTab', this)">📷 上傳圖片</button>
     <button class="tab-btn" onclick="switchTab('textTab', this)">✍️ 編輯文字</button>
-    <button class="tab-btn" onclick="switchTab('exportTab', this)">🎨 底色儲存</button>
   </div>
 
   <div class="control-panel">
     
-    <div id="imageTab" class="tab-content active">
+    <!-- 分頁 1: 設定底圖大小與底色 -->
+    <div id="canvasTab" class="tab-content active">
+      <div class="form-row">
+        <label>畫布底色：</label>
+        <input type="color" id="bgColorPicker" value="#ffffff">
+      </div>
+      <div class="form-row">
+        <label>寬度(px)：</label>
+        <input type="number" id="canvasWidthInput" value="350" min="100" max="2000" step="10">
+        <label style="min-width:60px; margin-left:6px;">高度：</label>
+        <input type="number" id="canvasHeightInput" value="350" min="100" max="2000" step="10">
+      </div>
+      <button id="applyCanvasSizeBtn" class="btn-action">套用畫布尺寸</button>
+    </div>
+
+    <!-- 分頁 2: 上傳圖片與去背 -->
+    <div id="imageTab" class="tab-content">
       <input type="file" id="imageInput" accept="image/*">
       
       <div id="bgControls" class="bg-controls">
@@ -185,9 +216,10 @@
         <button id="removeBgColorBtn" class="btn-magic">🪄 執行消除白底</button>
       </div>
 
-      <div id="status">請先點擊上方上傳圖片...</div>
+      <div id="status">點擊上方按鈕選擇圖片...</div>
     </div>
 
+    <!-- 分頁 3: 文字部分 -->
     <div id="textTab" class="tab-content">
       <input type="text" id="textInput" placeholder="請輸入文字..." value="特惠商品 5 折起">
       
@@ -209,18 +241,7 @@
         </select>
       </div>
 
-      <div class="form-row">
-        <button id="addTextBtn" class="btn-action">＋ 新增文字</button>
-        <button id="deleteBtn" class="btn-delete">🗑️ 刪除選取</button>
-      </div>
-    </div>
-
-    <div id="exportTab" class="tab-content">
-      <div class="form-row">
-        <label>畫布底色：</label>
-        <input type="color" id="bgColorPicker" value="#ffffff">
-      </div>
-      <button id="downloadBtn" class="btn-download">💾 下載完成海報</button>
+      <button id="addTextBtn" class="btn-action">＋ 新增文字</button>
     </div>
 
   </div>
@@ -251,17 +272,32 @@
         backgroundColor: '#ffffff'
       });
 
+      var canvasWidthInput = document.getElementById('canvasWidthInput');
+      var canvasHeightInput = document.getElementById('canvasHeightInput');
+      var applyCanvasSizeBtn = document.getElementById('applyCanvasSizeBtn');
+
       function resizeCanvasForMobile() {
         var availableWidth = window.innerWidth - 24;
-        var availableHeight = window.innerHeight - 340;
-        var size = Math.max(Math.min(availableWidth, availableHeight, 500), 280);
+        var availableHeight = window.innerHeight - 380;
+        var defaultSize = Math.max(Math.min(availableWidth, availableHeight, 500), 280);
         
-        canvas.setWidth(size);
-        canvas.setHeight(size);
+        canvas.setWidth(defaultSize);
+        canvas.setHeight(defaultSize);
+        canvasWidthInput.value = defaultSize;
+        canvasHeightInput.value = defaultSize;
         canvas.renderAll();
       }
       window.addEventListener('resize', resizeCanvasForMobile);
       resizeCanvasForMobile();
+
+      // 套用自訂畫布尺寸
+      applyCanvasSizeBtn.addEventListener('click', function() {
+        var w = parseInt(canvasWidthInput.value, 10) || 350;
+        var h = parseInt(canvasHeightInput.value, 10) || 350;
+        canvas.setWidth(w);
+        canvas.setHeight(h);
+        canvas.renderAll();
+      });
 
       var statusEl = document.getElementById('status');
       var imageInput = document.getElementById('imageInput');
@@ -275,7 +311,6 @@
       var fontSizeInput = document.getElementById('fontSizeInput');
       var fontFamilySelect = document.getElementById('fontFamilySelect');
 
-      // 監聽滑桿數據顯示
       distanceRange.addEventListener('input', function(e) {
         rangeVal.innerText = e.target.value;
       });
@@ -296,13 +331,10 @@
         }
       });
 
-      // 執行動態容忍度去背
       removeBgColorBtn.addEventListener('click', function() {
         var activeObj = canvas.getActiveObject();
         if (activeObj && activeObj.type === 'image') {
-          // 先清空舊的濾鏡，避免重複疊加
           activeObj.filters = [];
-          
           var threshold = parseFloat(distanceRange.value);
           var filter = new fabric.Image.filters.RemoveColor({
             color: '#FFFFFF',
@@ -312,7 +344,7 @@
           activeObj.filters.push(filter);
           activeObj.applyFilters();
           canvas.renderAll();
-          statusEl.innerText = "去背完成！（靈敏度: " + threshold + "）如挖空過頭，請把靈敏度往左調小再試。";
+          statusEl.innerText = "去背完成！（靈敏度: " + threshold + "）如挖空過頭請調小數值重試。";
         } else {
           alert("請先點選畫布上的圖片！");
         }
@@ -368,16 +400,17 @@
         }
       });
 
-      function deleteActiveObject() {
+      // 置頂刪除鍵邏輯
+      deleteBtn.addEventListener('click', function() {
         var activeObjects = canvas.getActiveObjects();
         if (activeObjects && activeObjects.length > 0) {
           activeObjects.forEach(function(obj) { canvas.remove(obj); });
           canvas.discardActiveObject();
           canvas.requestRenderAll();
+        } else {
+          alert("請先點選畫布上要刪除的圖片或文字！");
         }
-      }
-
-      deleteBtn.addEventListener('click', deleteActiveObject);
+      });
 
       document.getElementById('bgColorPicker').addEventListener('input', function(e) {
         canvas.setBackgroundColor(e.target.value, function() {
@@ -385,6 +418,7 @@
         });
       });
 
+      // 置頂下載鍵邏輯
       document.getElementById('downloadBtn').addEventListener('click', function() {
         var dataURL = canvas.toDataURL({ format: 'png', quality: 1.0 });
         var link = document.createElement('a');
